@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cricket Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+        input { width: 100%; padding: 15px; margin-bottom: 10px; font-size: 20px; box-sizing: border-box;}
+        button { width: 100%; padding: 20px; background: #28a745; color: white; font-size: 24px; border: none; border-radius: 8px; cursor: pointer; }
+        button:active { background: #1e7e34; }
+    </style>
+</head>
+<body>
+    <h2>Update Score</h2>
+    <input type="number" id="runs" placeholder="Runs">
+    <input type="number" id="wickets" placeholder="Wickets">
+    <input type="text" id="overs" placeholder="Overs (e.g. 2.4)">
+    <button onclick="updateScore()">UPDATE STREAM</button>
+    <p id="status" style="text-align:center; margin-top:10px;"></p>
+
+    <script>
+        // PASTE YOUR KEYS HERE
+        const BIN_ID = '6937d64fae596e708f8d16a9'; 
+        const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
+
+        function updateScore() {
+            const data = {
+                runs: document.getElementById('runs').value,
+                wickets: document.getElementById('wickets').value,
+                overs: document.getElementById('overs').value
+            };
+            
+            document.getElementById('status').innerText = "Updating...";
+
+            fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if(response.ok) document.getElementById('status').innerText = "✅ Updated!";
+                else document.getElementById('status').innerText = "❌ Error";
+            });
+        }
+    </script>
+</body>
+</html>
