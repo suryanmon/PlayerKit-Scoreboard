@@ -43,10 +43,10 @@
     <p id="status" style="text-align:center; margin-top:10px; color: #666;"></p>
 
     <script>
-        // --- PASTE YOUR KEYS HERE ---
-        const BIN_ID = 'YOUR_BIN_ID_HERE'; 
-        const API_KEY = 'YOUR_API_KEY_HERE';
-        // ----------------------------
+        // --- YOUR KEYS ARE SET BELOW ---
+        const BIN_ID = '6937d64fae596e708f8d16a9'; 
+        const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
+        // -------------------------------
 
         function updateScore() {
             const data = {
@@ -68,7 +68,7 @@
                 body: JSON.stringify(data)
             }).then(response => {
                 if(response.ok) document.getElementById('status').innerText = "✅ Updated!";
-                else document.getElementById('status').innerText = "❌ Error";
+                else document.getElementById('status').innerText = "❌ Error (Check Console)";
             });
         }
     </script>
