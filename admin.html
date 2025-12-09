@@ -5,29 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
-        input { width: 100%; padding: 15px; margin-bottom: 10px; font-size: 20px; box-sizing: border-box;}
-        button { width: 100%; padding: 20px; background: #28a745; color: white; font-size: 24px; border: none; border-radius: 8px; cursor: pointer; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input { width: 100%; padding: 12px; margin-bottom: 5px; font-size: 18px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;}
+        button { width: 100%; padding: 20px; background: #28a745; color: white; font-size: 24px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;}
         button:active { background: #1e7e34; }
     </style>
 </head>
 <body>
-    <h2>Update Score</h2>
-    <input type="number" id="runs" placeholder="Runs">
-    <input type="number" id="wickets" placeholder="Wickets">
-    <input type="text" id="overs" placeholder="Overs (e.g. 2.4)">
+    <h2>Update Scoreboard</h2>
+    
+    <label>Team Name (e.g. INDIA)</label>
+    <input type="text" id="team" placeholder="Team Name">
+
+    <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+            <label>Runs</label>
+            <input type="number" id="runs" placeholder="0">
+        </div>
+        <div style="flex:1;">
+            <label>Wickets</label>
+            <input type="number" id="wickets" placeholder="0">
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+            <label>Overs</label>
+            <input type="text" id="overs" placeholder="0.0">
+        </div>
+        <div style="flex:1;">
+            <label>Target (Optional)</label>
+            <input type="number" id="target" placeholder="0">
+        </div>
+    </div>
+
     <button onclick="updateScore()">UPDATE STREAM</button>
-    <p id="status" style="text-align:center; margin-top:10px;"></p>
+    <p id="status" style="text-align:center; margin-top:10px; color: #666;"></p>
 
     <script>
-        // PASTE YOUR KEYS HERE
-        const BIN_ID = '6937d64fae596e708f8d16a9'; 
-        const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
+        // --- PASTE YOUR KEYS HERE ---
+        const BIN_ID = 'YOUR_BIN_ID_HERE'; 
+        const API_KEY = 'YOUR_API_KEY_HERE';
+        // ----------------------------
 
         function updateScore() {
             const data = {
+                team: document.getElementById('team').value,
                 runs: document.getElementById('runs').value,
                 wickets: document.getElementById('wickets').value,
-                overs: document.getElementById('overs').value
+                overs: document.getElementById('overs').value,
+                target: document.getElementById('target').value
             };
             
             document.getElementById('status').innerText = "Updating...";
