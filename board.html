@@ -10,14 +10,14 @@
             left: 20px;
             background: linear-gradient(90deg, #004d40 0%, #00695c 100%);
             color: white;
-            padding: 8px 20px; /* Compact padding */
+            padding: 8px 20px;
             border-radius: 8px;
             border: 2px solid white;
             display: flex;
             align-items: center;
             gap: 15px;
             box-shadow: 0px 4px 6px rgba(0,0,0,0.5);
-            white-space: nowrap; /* Keeps everything on one line */
+            white-space: nowrap; 
         }
 
         /* Typography */
@@ -49,10 +49,10 @@
     </div>
 
     <script>
-        // --- PASTE YOUR KEYS HERE ---
-        const BIN_ID = 'YOUR_BIN_ID_HERE'; 
-        const API_KEY = 'YOUR_API_KEY_HERE';
-        // ----------------------------
+        // --- YOUR KEYS ARE SET BELOW ---
+        const BIN_ID = '6937d64fae596e708f8d16a9'; 
+        const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
+        // -------------------------------
 
         async function fetchScore() {
             try {
@@ -63,7 +63,7 @@
                 const data = json.record;
 
                 // 1. Prepare Data
-                const teamText = data.team || "TEAM"; // Default if empty
+                const teamText = data.team || "TEAM"; 
                 const scoreText = `${data.runs}/${data.wickets}`;
                 const overText = `OV: ${data.overs}`;
                 const targetVal = data.target;
