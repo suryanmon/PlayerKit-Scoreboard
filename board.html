@@ -2,272 +2,150 @@
 <html>
 <head>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap');
 
-        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Roboto', sans-serif; }
+        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Oswald', sans-serif; }
         
-        /* Main Container */
-        .scoreboard {
+        .container {
             position: fixed;
-            bottom: 40px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 95%;
-            max-width: 1200px;
-            height: 70px;
+            width: 90%;
+            max-width: 1000px;
             display: flex;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            border-radius: 4px;
-            overflow: hidden;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* 1. TOP BAR: Match Score */
+        .match-bar {
+            background: #2c3e50;
             color: white;
-            /* Default background, will be overridden by JS */
-            background-color: #0d1b54; 
-        }
-
-        /* --- SECTIONS --- */
-        
-        /* Left: Batting Team */
-        .batting-section {
-            flex: 3;
+            padding: 10px 20px;
+            border-radius: 8px;
             display: flex;
-            align-items: center;
-            padding-left: 10px;
-            position: relative;
-        }
-
-        /* Center: Status (Toss/Target) */
-        .status-section {
-            flex: 1.2;
-            background: linear-gradient(180deg, #aaddff 0%, #ffffff 100%);
-            color: #002244;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            line-height: 1.2;
-            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
-            margin-left: -20px; /* Overlap effect */
-            z-index: 2;
-        }
-
-        /* Right: Bowling Team */
-        .bowling-section {
-            flex: 2.5;
-            display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding-right: 15px;
-            padding-left: 20px;
-            background: rgba(0,0,0,0.2); /* Slightly darker */
-        }
-
-        /* --- ELEMENTS --- */
-
-        /* Team Name & Overs */
-        .team-block {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin-right: 15px;
-        }
-        .team-name { font-size: 22px; font-weight: 400; text-transform: uppercase; }
-        .over-count { font-size: 14px; opacity: 0.9; display: flex; align-items: center; gap: 5px; }
-        .pp-badge { background: #00acee; color: white; padding: 1px 4px; border-radius: 2px; font-size: 10px; font-weight: bold; }
-
-        /* MAIN SCORE */
-        .main-score {
-            font-size: 48px;
-            font-weight: 900;
-            color: #ffcc00; /* Gold color */
-            margin-right: 20px;
-            letter-spacing: -1px;
-        }
-
-        /* Batsmen Names */
-        .batsmen-list {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 700;
-            border-left: 1px solid rgba(255,255,255,0.3);
-            padding-left: 15px;
-            height: 70%;
-        }
-        .batsman { display: flex; justify-content: space-between; width: 140px; margin-bottom: 2px; }
-        .batsman span:last-child { opacity: 0.8; font-weight: 400; }
-        .striker-indicator { color: #ffcc00; margin-right: 4px; display: none;} 
-        
-        /* Bowling Side */
-        .vs-team { font-size: 20px; font-weight: 400; margin-right: 15px; opacity: 0.9; }
-        
-        .bowler-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            margin-right: 15px;
-            border-right: 1px solid rgba(255,255,255,0.3);
-            padding-right: 15px;
-        }
-        .bowler-name { font-size: 16px; font-weight: 700; text-transform: uppercase; }
-        .bowler-stats { font-size: 14px; }
-
-        /* Ball by Ball Boxes */
-        .this-over {
-            display: flex;
-            gap: 3px;
-        }
-        .ball {
-            width: 22px;
-            height: 22px;
-            background: white;
-            color: #333;
-            font-size: 12px;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
             align-items: center;
-            border-radius: 2px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid white;
         }
-        .ball.wick { background: #d32f2f; color: white; }
-        .ball.four { background: #0288d1; color: white; }
-        .ball.six { background: #388e3c; color: white; }
+        .main-score { font-size: 32px; font-weight: bold; color: #f1c40f; }
+        .teams { font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .target-box { font-size: 18px; color: #ecf0f1; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; }
+
+        /* 2. BOTTOM BAR: 4 Players Stats */
+        .players-grid {
+            display: flex;
+            gap: 10px;
+        }
+
+        .player-card {
+            flex: 1;
+            background: rgba(255,255,255,0.95);
+            padding: 8px 5px;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-bottom: 4px solid #3498db; /* Blue accent */
+        }
+        
+        /* Highlight Top Scorer (Example Logic could go here, for now simple styling) */
+        .p-name { display: block; font-size: 16px; font-weight: bold; color: #333; text-transform: uppercase; margin-bottom: 2px;}
+        .p-stats { display: block; font-size: 20px; font-weight: bold; color: #2c3e50; }
+        .wkt-label { color: #e74c3c; font-size: 16px; margin-left: 5px; } /* Red for wickets */
 
     </style>
 </head>
 <body>
 
-    <div class="scoreboard" id="board">
+    <div class="container" id="container" style="display:none;">
         
-        <div class="batting-section">
-            <div class="team-block">
-                <div class="team-name" id="batTeam">AUS</div>
-                <div class="over-count">
-                    <span id="overs">0.0</span>
-                    <span class="pp-badge" id="pp" style="display:none">P</span>
-                </div>
-            </div>
-
-            <div class="main-score" id="score">0-0</div>
-
-            <div class="batsmen-list">
-                <div class="batsman">
-                    <div><span class="striker-indicator">►</span><span id="bat1">BAT 1</span></div>
-                    <span id="bat1Sc">0(0)</span>
-                </div>
-                <div class="batsman">
-                    <div><span id="bat2">BAT 2</span></div>
-                    <span id="bat2Sc">0(0)</span>
-                </div>
-            </div>
+        <div class="match-bar">
+            <div class="teams"><span id="teamBat">TEAM A</span> vs <span id="teamBowl">TEAM B</span></div>
+            <div class="main-score"><span id="score">0-0</span> <span style="font-size:18px; color:white;">(<span id="overs">0.0</span>)</span></div>
+            <div class="target-box" id="targetBox" style="display:none;">TARGET: <span id="target">0</span></div>
         </div>
 
-        <div class="status-section">
-            <span id="matchStatus">MATCH START</span>
-        </div>
-
-        <div class="bowling-section">
-            <div class="vs-team">v <span id="bowlTeam">IND</span></div>
-
-            <div style="display:flex; align-items:center;">
-                <div class="bowler-info">
-                    <span class="bowler-name" id="bowler">BOWLER</span>
-                    <span class="bowler-stats"><span id="bowlerFigs">0-0</span> <span style="opacity:0.6" id="bowlerOvers">0.0</span></span>
-                </div>
-                
-                <div class="this-over" id="ballContainer">
-                    </div>
+        <div class="players-grid">
+            <div class="player-card">
+                <span class="p-name" id="p1Name">Player 1</span>
+                <span class="p-stats"><span id="p1Runs">0</span> <span class="wkt-label" id="p1Wkts">0W</span></span>
+            </div>
+            <div class="player-card">
+                <span class="p-name" id="p2Name">Player 2</span>
+                <span class="p-stats"><span id="p2Runs">0</span> <span class="wkt-label" id="p2Wkts">0W</span></span>
+            </div>
+            <div class="player-card">
+                <span class="p-name" id="p3Name">Player 3</span>
+                <span class="p-stats"><span id="p3Runs">0</span> <span class="wkt-label" id="p3Wkts">0W</span></span>
+            </div>
+            <div class="player-card">
+                <span class="p-name" id="p4Name">Player 4</span>
+                <span class="p-stats"><span id="p4Runs">0</span> <span class="wkt-label" id="p4Wkts">0W</span></span>
             </div>
         </div>
 
     </div>
 
     <script>
-        // --- KEYS ---
+        // --- YOUR KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // ------------
+        // -----------------
 
         async function fetchScore() {
             try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': API_KEY }
-                });
-                const json = await response.json();
-                const data = json.record;
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
+                const json = await res.json();
+                const d = json.record;
 
-                // 1. Theme Color
-                if(data.themeColor) document.getElementById('board').style.backgroundColor = data.themeColor;
+                // Show container only when data loads
+                document.getElementById('container').style.display = "flex";
 
-                // 2. Batting Stats
-                setText('batTeam', data.batTeam);
-                setText('score', `${data.runs}-${data.wickets}`);
-                setText('overs', data.overs);
+                // Match Stats
+                setText('teamBat', d.teamBat || "TEAM A");
+                setText('teamBowl', d.teamBowl || "TEAM B");
+                setText('score', d.score || "0-0");
+                setText('overs', d.overs || "0.0");
                 
-                // Powerplay Badge
-                const ppEl = document.getElementById('pp');
-                if(data.pp && data.pp.trim() !== "") {
-                    ppEl.style.display = "inline-block";
-                    ppEl.innerText = data.pp;
+                // Target Logic
+                const tgt = document.getElementById('targetBox');
+                if(d.target && d.target > 0) {
+                    tgt.style.display = "block";
+                    setText('target', d.target);
                 } else {
-                    ppEl.style.display = "none";
+                    tgt.style.display = "none";
                 }
 
-                // Batsmen
-                setText('bat1', data.bat1);
-                setText('bat1Sc', `${data.bat1Runs}(${data.bat1Balls})`);
-                setText('bat2', data.bat2);
-                setText('bat2Sc', `${data.bat2Runs}(${data.bat2Balls})`);
+                // Player Stats Logic (Name | Runs + Wickets)
+                updatePlayer(1, d.p1Name, d.p1Runs, d.p1Wkts);
+                updatePlayer(2, d.p2Name, d.p2Runs, d.p2Wkts);
+                updatePlayer(3, d.p3Name, d.p3Runs, d.p3Wkts);
+                updatePlayer(4, d.p4Name, d.p4Runs, d.p4Wkts);
 
-                // 3. Center Status
-                setText('matchStatus', data.matchStatus);
-
-                // 4. Bowling Stats
-                setText('bowlTeam', data.bowlTeam);
-                setText('bowler', data.bowler);
-                setText('bowlerFigs', data.bowlerFigs);
-                setText('bowlerOvers', data.bowlerOvers);
-
-                // 5. This Over (Ball Logic)
-                const ballContainer = document.getElementById('ballContainer');
-                const rawBalls = data.thisOver || "";
-                
-                // Only redraw if changed (basic check)
-                if(ballContainer.dataset.raw !== rawBalls) {
-                    ballContainer.innerHTML = ""; // Clear old
-                    ballContainer.dataset.raw = rawBalls;
-                    
-                    if(rawBalls.trim() !== "") {
-                        const balls = rawBalls.split(',');
-                        balls.forEach(b => {
-                            const val = b.trim();
-                            const div = document.createElement('div');
-                            div.className = 'ball';
-                            div.innerText = val;
-                            
-                            // Colors for events
-                            if(val.toLowerCase().includes('w')) div.className += ' wick';
-                            else if(val === '4') div.className += ' four';
-                            else if(val === '6') div.className += ' six';
-                            
-                            ballContainer.appendChild(div);
-                        });
-                    }
-                }
-
-            } catch (error) { console.log('Error fetching score'); }
+            } catch (e) { console.log(e); }
         }
 
-        function setText(id, val) {
+        function updatePlayer(num, name, runs, wkts) {
+            setText(`p${num}Name`, name || `P${num}`);
+            setText(`p${num}Runs`, runs || "0");
+            
+            // Format wickets: If 0, show "0W", if 2 show "2W"
+            const wLabel = document.getElementById(`p${num}Wkts`);
+            const wCount = wkts || "0";
+            wLabel.innerText = wCount + "W";
+            
+            // If they have wickets, make it redder/bolder? (Already styled in CSS)
+        }
+
+        function setText(id, txt) {
             const el = document.getElementById(id);
-            if(el && val !== undefined) el.innerText = val;
+            if(el) el.innerText = txt;
         }
 
         setInterval(fetchScore, 3000);
-        fetchScore(); 
+        fetchScore();
     </script>
 </body>
 </html>
