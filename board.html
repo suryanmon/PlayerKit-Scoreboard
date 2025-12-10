@@ -8,20 +8,20 @@
         
         .container {
             position: fixed;
-            bottom: 20px; /* Sits at bottom */
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
-            max-width: 600px; /* Keeps it short width-wise */
+            max-width: 600px;
             display: flex;
             flex-direction: column;
             gap: 5px;
         }
 
-        /* 1. THE SPLIT HEADER (TV Style) */
+        /* HEADER BAR */
         .header-bar {
             display: flex;
-            height: 45px; /* Compact Height */
+            height: 50px; /* Slightly taller to fit Target */
             border-radius: 6px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
@@ -39,25 +39,21 @@
             font-size: 18px;
         }
         
+        /* The Middle Score Box */
         .score-middle {
-            flex: 0 0 120px; /* Fixed width for score */
+            flex: 0 0 130px; /* Width */
             background: #111;
-            color: #ffeb3b; /* Yellow Score */
+            color: #ffeb3b;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Stack items vertically */
             align-items: center;
             justify-content: center;
             line-height: 1;
-            position: relative;
         }
-        .main-score { font-size: 24px; }
+        
+        .target-txt { font-size: 12px; color: #ffab91; margin-bottom: 2px; display:none; } /* Orange Target */
+        .main-score { font-size: 26px; }
         .overs-small { font-size: 12px; color: #ccc; margin-top: 2px;}
-
-        /* Target Popup */
-        .target-tag { 
-            position: absolute; top: -18px; background: #d32f2f; color: white; 
-            font-size: 10px; padding: 2px 6px; border-radius: 3px; 
-        }
 
         .bowl-side {
             flex: 1;
@@ -70,7 +66,7 @@
             font-size: 18px;
         }
 
-        /* 2. COMPACT PLAYER LIST */
+        /* PLAYER LIST */
         .player-list {
             display: flex;
             flex-direction: column;
@@ -79,18 +75,18 @@
 
         .player-row {
             background: rgba(255,255,255,0.9);
-            padding: 4px 12px; /* Very thin rows */
+            padding: 4px 12px;
             border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px; /* Smaller font */
+            font-size: 14px;
             font-weight: bold;
             color: #333;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
-        /* MVP Gold Style */
+        /* MVP Styling */
         .mvp {
             background: linear-gradient(90deg, #FFD700, #ffecb3);
             border-left: 4px solid #b8860b;
@@ -110,11 +106,13 @@
         
         <div class="header-bar">
             <div class="bat-side" id="teamBat">BAT</div>
+            
             <div class="score-middle">
-                <span id="targetTag" class="target-tag" style="display:none">TGT: 0</span>
+                <span id="targetTxt" class="target-txt">TGT: 0</span>
                 <span class="main-score" id="score">0-0</span>
                 <span class="overs-small" id="overs">0.0</span>
             </div>
+
             <div class="bowl-side" id="teamBowl">BOWL</div>
         </div>
 
@@ -137,22 +135,22 @@
 
                 document.getElementById('container').style.display = "flex";
 
-                // Header Updates
+                // Update Texts
                 document.getElementById('teamBat').innerText = d.teamBat || "TEAM A";
                 document.getElementById('teamBowl').innerText = d.teamBowl || "TEAM B";
                 document.getElementById('score').innerText = d.score || "0-0";
                 document.getElementById('overs').innerText = d.overs || "0.0";
                 
-                // Target Display
-                const tBox = document.getElementById('targetTag');
+                // Target Logic
+                const tBox = document.getElementById('targetTxt');
                 if(d.target && d.target > 0) {
                     tBox.style.display = "block";
-                    tBox.innerText = "TGT: " + d.target;
+                    tBox.innerText = "TARGET: " + d.target;
                 } else {
                     tBox.style.display = "none";
                 }
 
-                // Players Logic
+                // Player Logic & Sorting
                 let players = [];
                 for(let i=1; i<=4; i++) {
                     players.push({
@@ -162,11 +160,9 @@
                         isBat: d[`p${i}Bat`]
                     });
                 }
-
-                // Sort: Highest Points (Runs + Wkts*15)
                 players.sort((a,b) => (b.runs + b.wkts*15) - (a.runs + a.wkts*15));
 
-                // Render
+                // Render List
                 const list = document.getElementById('list');
                 list.innerHTML = "";
                 
