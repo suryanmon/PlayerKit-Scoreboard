@@ -28,9 +28,6 @@
         .details { display: flex; flex-direction: column; justify-content: center; font-size: 14px; font-weight: bold; color: #b2dfdb; }
         .target-label { color: #ff8a80; } /* Light red for target */
 
-        /* Animation */
-        .blink { animation: flash 1s; }
-        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -69,31 +66,23 @@
                 const targetVal = data.target;
 
                 // 2. Update Elements
-                const board = document.getElementById('board');
                 const teamEl = document.getElementById('teamDisplay');
                 const scoreEl = document.getElementById('scoreDisplay');
                 const overEl = document.getElementById('overDisplay');
                 const targetContainer = document.getElementById('targetContainer');
                 const targetEl = document.getElementById('targetDisplay');
 
-                // Check if anything changed (to trigger animation)
-                if (scoreEl.innerText !== scoreText || overEl.innerText !== overText || teamEl.innerText !== teamText) {
-                    
-                    teamEl.innerText = teamText;
-                    scoreEl.innerText = scoreText;
-                    overEl.innerText = overText;
+                // Update Text (Only changes the number, no flashing)
+                if (teamEl.innerText !== teamText) teamEl.innerText = teamText;
+                if (scoreEl.innerText !== scoreText) scoreEl.innerText = scoreText;
+                if (overEl.innerText !== overText) overEl.innerText = overText;
 
-                    // Handle Target Visibility
-                    if (targetVal && targetVal > 0) {
-                        targetContainer.style.display = "block";
-                        targetEl.innerText = targetVal;
-                    } else {
-                        targetContainer.style.display = "none";
-                    }
-
-                    // Blink Effect
-                    board.classList.add('blink');
-                    setTimeout(() => board.classList.remove('blink'), 1000);
+                // Handle Target Visibility
+                if (targetVal && targetVal > 0) {
+                    targetContainer.style.display = "block";
+                    targetEl.innerText = targetVal;
+                } else {
+                    targetContainer.style.display = "none";
                 }
 
             } catch (error) { console.log('Error fetching score'); }
