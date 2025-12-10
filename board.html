@@ -12,81 +12,80 @@
             left: 50%;
             transform: translateX(-50%);
             width: 98%;
-            max-width: 850px;
-            height: 70px; /* Fixed compact height */
-            background: linear-gradient(90deg, #0f2027 0%, #203a43 50%, #2c5364 100%); /* Official TV Gradient */
+            max-width: 900px;
+            height: 70px;
+            background: #0f2027; /* Dark Base */
             border-radius: 8px;
             display: flex;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-            border-bottom: 3px solid #00acee; /* Highlight strip */
             color: white;
+            border-bottom: 2px solid #333;
         }
 
-        /* SECTION 1: MAIN SCORE (Left) */
+        /* 1. MATCH SCORE (Left - Fixed Width) */
         .main-stats {
-            flex: 1.2;
-            background: rgba(0,0,0,0.3);
+            flex: 0 0 180px; /* Fixed width */
+            background: #19252b;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 15px;
-            padding-right: 15px;
-            border-right: 1px solid rgba(255,255,255,0.2);
-            position: relative;
+            padding: 0 15px;
+            border-right: 1px solid rgba(255,255,255,0.1);
         }
         
-        .team-line { display: flex; align-items: center; justify-content: space-between; font-weight: 700; text-transform: uppercase; font-size: 18px; color: #fff;}
-        .score-line { display: flex; align-items: baseline; gap: 8px; margin-top: -2px;}
-        .big-score { font-size: 32px; font-weight: 800; color: #ffeb3b; line-height: 1; }
-        .overs { font-size: 16px; color: #ccc; font-weight: 400; }
-        
-        /* Target Tag (Now inside the box, won't cut off) */
-        .target-tag { 
-            font-size: 11px; 
-            background: #d32f2f; 
-            padding: 2px 6px; 
-            border-radius: 3px; 
-            text-transform: uppercase; 
-            font-weight: bold;
-            display: none; /* Hidden if 0 */
-        }
+        .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 2px;}
+        .score-line { display: flex; align-items: baseline; gap: 8px; }
+        .big-score { font-size: 28px; font-weight: 800; color: #ffeb3b; line-height: 1; }
+        .overs { font-size: 14px; color: #aaa; font-weight: 400; }
+        .target-tag { font-size: 10px; background: #d32f2f; padding: 2px 5px; border-radius: 3px; display: none; }
 
-        /* SECTION 2: 4 PLAYERS (Right - Horizontal Grid) */
-        .players-area {
-            flex: 2;
+        /* 2. PLAYERS WRAPPER */
+        .players-wrapper {
+            flex: 1;
             display: flex;
-            align-items: center;
-            padding: 0 10px;
         }
 
-        .player-grid {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 columns */
-            grid-template-rows: 1fr 1fr;    /* 2 rows */
-            gap: 2px 15px; /* Gap between items */
+        /* TEAM BLUE SECTION */
+        .team-section-blue {
+            flex: 1;
+            background: linear-gradient(90deg, rgba(2,119,189,0.15) 0%, transparent 100%);
+            border-left: 4px solid #0277bd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 15px;
         }
 
-        .p-item {
+        /* TEAM RED SECTION */
+        .team-section-red {
+            flex: 1;
+            background: linear-gradient(90deg, transparent 0%, rgba(198,40,40,0.15) 100%);
+            border-right: 4px solid #c62828;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 15px;
+        }
+
+        /* Player Row Style */
+        .p-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            color: #e0e0e0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 2px 0;
+            color: #eee;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+        .p-row:last-child { border-bottom: none; }
         
-        /* MVP Styling (Top Performer) */
-        .p-item.mvp { color: #ffd700; text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); font-weight: 700; }
-
-        .p-stats span { margin-left: 5px; }
-        .run-t { color: white; }
-        .wkt-t { color: #ff8a80; } /* Light Red */
-        .bat-i { display:none; margin-right:4px; font-size:10px; }
-        .batting .bat-i { display:inline; }
+        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; text-transform: uppercase;}
+        .p-stats { display: flex; gap: 10px; font-weight: 700; }
+        .run-val { color: #fff; width: 30px; text-align: right; }
+        .wkt-val { color: #ff8a80; width: 30px; text-align: right; }
 
     </style>
 </head>
@@ -96,7 +95,7 @@
         
         <div class="main-stats">
             <div class="team-line">
-                <span id="teamBat">RANGERS</span>
+                <span id="teamBat">MATCH</span>
                 <span id="targetBox" class="target-tag">TGT: 10</span>
             </div>
             <div class="score-line">
@@ -105,18 +104,51 @@
             </div>
         </div>
 
-        <div class="players-area">
-            <div class="player-grid" id="pGrid">
+        <div class="players-wrapper">
+            
+            <div class="team-section-blue">
+                <div class="p-row">
+                    <span class="p-name" id="p1Name">Player 1</span>
+                    <div class="p-stats">
+                        <span class="run-val" id="p1Runs">0</span>
+                        <span class="wkt-val"><span id="p1Wkts">0</span>W</span>
+                    </div>
                 </div>
+                <div class="p-row">
+                    <span class="p-name" id="p2Name">Player 2</span>
+                    <div class="p-stats">
+                        <span class="run-val" id="p2Runs">0</span>
+                        <span class="wkt-val"><span id="p2Wkts">0</span>W</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-section-red">
+                <div class="p-row">
+                    <span class="p-name" id="p3Name">Player 3</span>
+                    <div class="p-stats">
+                        <span class="run-val" id="p3Runs">0</span>
+                        <span class="wkt-val"><span id="p3Wkts">0</span>W</span>
+                    </div>
+                </div>
+                <div class="p-row">
+                    <span class="p-name" id="p4Name">Player 4</span>
+                    <div class="p-stats">
+                        <span class="run-val" id="p4Runs">0</span>
+                        <span class="wkt-val"><span id="p4Wkts">0</span>W</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </div>
 
     <script>
-        // --- YOUR KEYS (Pre-filled) ---
+        // --- YOUR KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // ------------------------------
+        // -----------------
 
         async function fetchScore() {
             try {
@@ -126,55 +158,32 @@
 
                 document.getElementById('container').style.display = "flex";
 
-                // Update Main Stats
-                document.getElementById('teamBat').innerText = d.teamBat || "TEAM";
-                document.getElementById('score').innerText = d.score || "0-0";
-                document.getElementById('overs').innerText = `(${d.overs || "0.0"})`;
+                // Score
+                setText('teamBat', d.teamBat || "MATCH");
+                setText('score', d.score || "0-0");
+                setText('overs', `(${d.overs || "0.0"})`);
                 
-                // Target Display
+                // Target
                 const tBox = document.getElementById('targetBox');
                 if(d.target && d.target > 0) {
                     tBox.style.display = "inline-block";
-                    tBox.innerText = "TARGET: " + d.target;
+                    tBox.innerText = "TGT: " + d.target;
                 } else {
                     tBox.style.display = "none";
                 }
 
-                // Process Players
-                let players = [];
-                for(let i=1; i<=4; i++) {
-                    players.push({
-                        name: d[`p${i}Name`], 
-                        runs: parseInt(d[`p${i}Runs`]||0), 
-                        wkts: parseInt(d[`p${i}Wkts`]||0),
-                        isBat: d[`p${i}Bat`]
-                    });
-                }
-                // Sort by Points
-                players.sort((a,b) => (b.runs + b.wkts*15) - (a.runs + a.wkts*15));
-
-                // Render Grid
-                const grid = document.getElementById('pGrid');
-                grid.innerHTML = "";
-                
-                players.forEach((p, idx) => {
-                    const isMVP = (idx === 0 && (p.runs > 0 || p.wkts > 0));
-                    const batClass = p.isBat ? "batting" : "";
-                    const mvpClass = isMVP ? "mvp" : "";
-                    
-                    grid.innerHTML += `
-                    <div class="p-item ${mvpClass} ${batClass}">
-                        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">
-                            <span class="bat-i">🏏</span>${p.name || "P"+(idx+1)}
-                        </div>
-                        <div class="p-stats">
-                            <span class="run-t">${p.runs}</span>
-                            <span class="wkt-t">${p.wkts}W</span>
-                        </div>
-                    </div>`;
-                });
+                // Players (No sorting, strictly mapped)
+                setText('p1Name', d.p1Name || "P1"); setText('p1Runs', d.p1Runs || 0); setText('p1Wkts', d.p1Wkts || 0);
+                setText('p2Name', d.p2Name || "P2"); setText('p2Runs', d.p2Runs || 0); setText('p2Wkts', d.p2Wkts || 0);
+                setText('p3Name', d.p3Name || "P3"); setText('p3Runs', d.p3Runs || 0); setText('p3Wkts', d.p3Wkts || 0);
+                setText('p4Name', d.p4Name || "P4"); setText('p4Runs', d.p4Runs || 0); setText('p4Wkts', d.p4Wkts || 0);
 
             } catch (e) { console.log(e); }
+        }
+
+        function setText(id, txt) {
+            const el = document.getElementById(id);
+            if(el) el.innerText = txt;
         }
 
         setInterval(fetchScore, 3000);
