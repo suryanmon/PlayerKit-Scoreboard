@@ -32,7 +32,7 @@
         /* --- LEFT: MATCH SCORE --- */
         .score-card {
             width: 220px;
-            height: 70px;
+            height: 85px; /* Increased height slightly to fit bottom text */
             background: #19252b;
             display: flex;
             flex-direction: column;
@@ -43,11 +43,25 @@
         }
 
         .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 2px; text-transform: uppercase;}
-        .score-line { display: flex; align-items: baseline; gap: 8px; }
+        
+        /* Main Live Score */
+        .score-line { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px;}
         .big-score { font-size: 34px; font-weight: 800; color: #ffeb3b; line-height: 1; }
         .overs { font-size: 16px; color: #aaa; font-weight: 400; }
         
-        /* Updated Target Tag: Bigger and full text */
+        /* NEW: Opponent / Bottom Score */
+        .opp-score-line {
+            font-size: 14px;
+            color: #ccc;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2px;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Target Tag */
         .target-tag { 
             font-size: 11px; 
             background: #d32f2f; 
@@ -135,10 +149,14 @@
                 <span id="mainTeamName">MATCH</span>
                 <span id="targetBox" class="target-tag">TARGET: 0</span>
             </div>
+            
             <div class="score-line">
                 <span class="big-score" id="score">0-0</span>
                 <span class="overs" id="overs">(0.0)</span>
             </div>
+
+            <div class="opp-score-line" id="oppScoreDisplay">
+                </div>
         </div>
 
         <div class="card-base leaderboard-card">
@@ -230,6 +248,10 @@
 
                 setText('score', d.score || "0-0");
                 setText('overs', `(${d.overs || "0.0"})`);
+
+                // Opponent Score Update
+                const oppText = d.oppScore || "";
+                document.getElementById('oppScoreDisplay').innerText = oppText;
                 
                 const tBox = document.getElementById('targetBox');
                 if(d.target && d.target > 0) {
@@ -247,8 +269,7 @@
 
         function updatePlayer(num, d) {
             const nameEl = document.getElementById(`p${num}Name`);
-            nameEl.innerText = d[`p${num}Name`] || `P${num}`; // Just text, no icons
-            
+            nameEl.innerText = d[`p${num}Name`] || `P${num}`;
             setText(`p${num}Runs`, d[`p${num}Runs`] || 0);
             setText(`p${num}Wkts`, d[`p${num}Wkts`] || 0);
         }
