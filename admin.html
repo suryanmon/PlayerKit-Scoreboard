@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2v2 Controller</title>
+    <title>2v2 Split Controller</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; background: #eef2f5; padding: 15px; max-width: 500px; margin: auto; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
         input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        label { font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; }
-        .bat-check { text-align: center; } 
+        label { font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 5px; display:block; }
+        
+        .team-header { padding: 5px 10px; border-radius: 4px; color: white; margin-bottom: 10px; font-weight: bold; text-align: center; }
+        .blue-h { background: #0277bd; }
+        .red-h { background: #c62828; }
+
         button { width: 100%; padding: 15px; background: #222; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
@@ -17,12 +21,11 @@
     <h3 style="text-align:center; margin:0 0 15px 0;">Match Controller</h3>
 
     <div class="card">
-        <label>TEAMS</label>
+        <label>MATCH STATUS</label>
         <div class="row">
-            <input type="text" id="teamBat" placeholder="Batting Team (Left)">
-            <input type="text" id="teamBowl" placeholder="Bowling Team (Right)">
+            <input type="text" id="teamBat" placeholder="Team Blue Name" style="border-left: 4px solid #0277bd;">
+            <input type="text" id="teamBowl" placeholder="Team Red Name" style="border-left: 4px solid #c62828;">
         </div>
-        <label>SCORE & TARGET</label>
         <div class="row">
             <input type="text" id="score" placeholder="Score (e.g. 45-1)">
             <input type="text" id="overs" placeholder="Overs (0.0)">
@@ -31,8 +34,31 @@
     </div>
 
     <div class="card">
-        <label style="margin-bottom:10px; display:block;">PLAYERS (Check box if Batting)</label>
-        <div id="playerInputs"></div>
+        <div class="team-header blue-h">TEAM BLUE (Left Side)</div>
+        <div class="row">
+            <input type="text" id="p1Name" placeholder="Player 1 Name" style="flex:2">
+            <input type="number" id="p1Runs" placeholder="R" style="flex:1">
+            <input type="number" id="p1Wkts" placeholder="W" style="flex:1">
+        </div>
+        <div class="row">
+            <input type="text" id="p2Name" placeholder="Player 2 Name" style="flex:2">
+            <input type="number" id="p2Runs" placeholder="R" style="flex:1">
+            <input type="number" id="p2Wkts" placeholder="W" style="flex:1">
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="team-header red-h">TEAM RED (Right Side)</div>
+        <div class="row">
+            <input type="text" id="p3Name" placeholder="Player 3 Name" style="flex:2">
+            <input type="number" id="p3Runs" placeholder="R" style="flex:1">
+            <input type="number" id="p3Wkts" placeholder="W" style="flex:1">
+        </div>
+        <div class="row">
+            <input type="text" id="p4Name" placeholder="Player 4 Name" style="flex:2">
+            <input type="number" id="p4Runs" placeholder="R" style="flex:1">
+            <input type="number" id="p4Wkts" placeholder="W" style="flex:1">
+        </div>
     </div>
 
     <button onclick="updateScore()" id="btn">UPDATE SCOREBOARD</button>
@@ -44,35 +70,21 @@
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
         // ------------
 
-        // Auto-generate player inputs
-        let html = '';
-        for(let i=1; i<=4; i++) {
-            html += `
-            <div class="row">
-                <div class="bat-check"><input type="checkbox" id="p${i}Bat"></div>
-                <input type="text" id="p${i}Name" placeholder="Player ${i}" style="flex:2">
-                <input type="number" id="p${i}Runs" placeholder="R" style="flex:1">
-                <input type="number" id="p${i}Wkts" placeholder="W" style="flex:1">
-            </div>`;
-        }
-        document.getElementById('playerInputs').innerHTML = html;
-
-        const ids = ['teamBat', 'teamBowl', 'score', 'overs', 'target'];
-        for(let i=1; i<=4; i++) ids.push(`p${i}Name`, `p${i}Runs`, `p${i}Wkts`);
+        const ids = ['teamBat', 'teamBowl', 'score', 'overs', 'target', 
+                     'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
+                     'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
 
         // Load Data
         fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {headers: {'X-Master-Key': API_KEY}})
             .then(res => res.json()).then(json => {
                 const d = json.record;
                 ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = d[id] || ""; });
-                for(let i=1; i<=4; i++) document.getElementById(`p${i}Bat`).checked = d[`p${i}Bat`] || false;
             });
 
         function updateScore() {
             document.getElementById('btn').innerText = "Updating...";
             let data = {};
             ids.forEach(id => data[id] = document.getElementById(id).value);
-            for(let i=1; i<=4; i++) data[`p${i}Bat`] = document.getElementById(`p${i}Bat`).checked;
 
             fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data)
