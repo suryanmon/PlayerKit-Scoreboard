@@ -11,7 +11,7 @@
             bottom: 30px;
             left: 20px;
             right: 20px;
-            height: 90px; /* Increased height to fit Leaderboard Title */
+            height: 90px;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
@@ -32,7 +32,7 @@
         /* --- LEFT: MATCH SCORE --- */
         .score-card {
             width: 220px;
-            height: 70px; /* Fixed height matches old size */
+            height: 70px;
             background: #19252b;
             display: flex;
             flex-direction: column;
@@ -46,17 +46,30 @@
         .score-line { display: flex; align-items: baseline; gap: 8px; }
         .big-score { font-size: 34px; font-weight: 800; color: #ffeb3b; line-height: 1; }
         .overs { font-size: 16px; color: #aaa; font-weight: 400; }
-        .target-tag { font-size: 11px; background: #d32f2f; color:white; padding: 2px 6px; border-radius: 3px; display: none; font-weight: bold; position: absolute; right: 20px; top: 22px;}
+        
+        /* Updated Target Tag: Bigger and full text */
+        .target-tag { 
+            font-size: 11px; 
+            background: #d32f2f; 
+            color: white; 
+            padding: 3px 6px; 
+            border-radius: 3px; 
+            display: none; 
+            font-weight: 800; 
+            position: absolute; 
+            right: 15px; 
+            top: 15px;
+            letter-spacing: 0.5px;
+        }
 
         /* --- RIGHT: LEADERBOARD --- */
         .leaderboard-card {
             width: 500px; 
-            height: 100%; /* Fills the 90px wrapper */
+            height: 100%;
             display: flex;
-            flex-direction: column; /* Stack Title on top */
+            flex-direction: column; 
         }
 
-        /* The Main "Leaderboard" Title Box */
         .lb-main-title {
             background: #000;
             color: #888;
@@ -79,10 +92,9 @@
             flex-direction: column;
             position: relative;
             transition: all 0.5s ease;
-            justify-content: center; /* Center rows vertically */
+            justify-content: center;
         }
 
-        /* Team Name Headings (Rangers/Pangers) */
         .lb-header {
             font-size: 12px;
             font-weight: 800;
@@ -107,13 +119,10 @@
         }
         .p-row:last-child { border-bottom: none; }
         
-        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; text-transform: uppercase; }
         .p-stats { display: flex; gap: 10px; font-weight: 700; }
         .run-val { color: #fff; width: 25px; text-align: right; }
         .wkt-val { color: #ff8a80; width: 25px; text-align: right; }
-        
-        .icon-bat { font-size: 12px; filter: drop-shadow(0 0 2px #fff); }
-        .icon-ball { font-size: 10px; filter: drop-shadow(0 0 2px red); }
 
     </style>
 </head>
@@ -124,7 +133,7 @@
         <div class="card-base score-card">
             <div class="team-line">
                 <span id="mainTeamName">MATCH</span>
-                <span id="targetBox" class="target-tag">TGT: 10</span>
+                <span id="targetBox" class="target-tag">TARGET: 0</span>
             </div>
             <div class="score-line">
                 <span class="big-score" id="score">0-0</span>
@@ -172,7 +181,9 @@
                         </div>
                     </div>
                 </div>
-            </div> </div>
+            </div> 
+
+        </div>
 
     </div>
 
@@ -223,7 +234,7 @@
                 const tBox = document.getElementById('targetBox');
                 if(d.target && d.target > 0) {
                     tBox.style.display = "inline-block";
-                    tBox.innerText = "TGT: " + d.target;
+                    tBox.innerText = "TARGET: " + d.target;
                 } else {
                     tBox.style.display = "none";
                 }
@@ -236,15 +247,7 @@
 
         function updatePlayer(num, d) {
             const nameEl = document.getElementById(`p${num}Name`);
-            const rawName = d[`p${num}Name`] || `P${num}`;
-            const isBat = d[`p${num}Bat`];
-            const isBowl = d[`p${num}Bowl`];
-
-            let html = rawName;
-            if(isBat) html = `<span class="icon-bat">🏏</span> ` + html;
-            if(isBowl) html += ` <span class="icon-ball">🔴</span>`;
-            
-            nameEl.innerHTML = html;
+            nameEl.innerText = d[`p${num}Name`] || `P${num}`; // Just text, no icons
             
             setText(`p${num}Runs`, d[`p${num}Runs`] || 0);
             setText(`p${num}Wkts`, d[`p${num}Wkts`] || 0);
