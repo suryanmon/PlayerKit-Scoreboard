@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2v2 Pro Admin</title>
+    <title>2v2 Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; background: #121212; color: white; padding: 15px; max-width: 500px; margin: auto; }
@@ -12,11 +12,7 @@
         input[type="color"] { border: none; width: 50px; height: 40px; cursor: pointer; background: transparent; }
         
         label { font-size: 11px; font-weight: bold; color: #aaa; text-transform: uppercase; margin-bottom: 5px; display:block; }
-        
-        /* Headers */
         .team-header { padding: 8px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        
-        /* Checkboxes */
         .icon-check { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 10px; color: #aaa; }
         .icon-check input { width: 18px; height: 18px; accent-color: #00acee; }
 
@@ -26,13 +22,13 @@
         .toggle-btn.active { background: #00acee; color: white; }
         input[type="radio"] { display: none; }
 
-        button { width: 100%; padding: 15px; background: #00acee; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(0, 172, 238, 0.4); }
-        button:hover { background: #008cc9; }
-
+        .btn-update { width: 100%; padding: 15px; background: #00acee; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(0, 172, 238, 0.4); }
+        .btn-reset { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; margin-top: 15px; opacity: 0.8; }
+        
     </style>
 </head>
 <body>
-    <h3 style="text-align:center; margin:0 0 15px 0;">🏏 Pro Controller</h3>
+    <h3 style="text-align:center; margin:0 0 15px 0;">🏏 Match Controller</h3>
 
     <div class="card">
         <label>Who is Batting Now?</label>
@@ -49,8 +45,8 @@
 
         <label style="margin-top:10px;">Match Stats</label>
         <div class="row">
-            <input type="text" id="score" placeholder="Score (e.g. 45-1)">
-            <input type="text" id="overs" placeholder="Overs (0.0)">
+            <input type="text" id="score" placeholder="Score">
+            <input type="text" id="overs" placeholder="Overs">
             <input type="number" id="target" placeholder="Target">
         </div>
     </div>
@@ -61,7 +57,6 @@
             <input type="color" id="color1" value="#0277bd" onchange="updateColors()">
         </div>
         <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
-        
         <div class="row">
             <label class="icon-check">🏏<input type="checkbox" id="p1Bat"></label>
             <label class="icon-check">🔴<input type="checkbox" id="p1Bowl"></label>
@@ -84,7 +79,6 @@
             <input type="color" id="color2" value="#c62828" onchange="updateColors()">
         </div>
         <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
-        
         <div class="row">
             <label class="icon-check">🏏<input type="checkbox" id="p3Bat"></label>
             <label class="icon-check">🔴<input type="checkbox" id="p3Bowl"></label>
@@ -101,7 +95,9 @@
         </div>
     </div>
 
-    <button onclick="updateScore()" id="btn">UPDATE BROADCAST</button>
+    <button onclick="updateScore()" id="btn" class="btn-update">UPDATE BOARD</button>
+    <button onclick="resetBoard()" class="btn-reset">⚠️ RESET SCORES</button>
+    
     <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Ready</div>
 
     <script>
@@ -113,7 +109,6 @@
         const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
-
         const checks = ['p1Bat', 'p1Bowl', 'p2Bat', 'p2Bowl', 'p3Bat', 'p3Bowl', 'p4Bat', 'p4Bowl'];
 
         function setBatting(team) {
@@ -128,14 +123,12 @@
             document.getElementById('card2').style.borderColor = document.getElementById('color2').value;
         }
 
-        // Load Data
+        // Load
         fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {headers: {'X-Master-Key': API_KEY}})
             .then(res => res.json()).then(json => {
                 const d = json.record;
                 ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = d[id] || ""; });
                 checks.forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = d[id] || false; });
-                
-                // Set Toggle State
                 setBatting(d.battingSide || 'team1');
                 updateColors();
             });
@@ -145,16 +138,27 @@
             let data = {};
             ids.forEach(id => data[id] = document.getElementById(id).value);
             checks.forEach(id => data[id] = document.getElementById(id).checked);
-            
-            // Save toggle state
             data.battingSide = document.getElementById('batSide1').checked ? 'team1' : 'team2';
 
             fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data)
             }).then(() => {
-                document.getElementById('btn').innerText = "UPDATE BROADCAST";
+                document.getElementById('btn').innerText = "UPDATE BOARD";
                 document.getElementById('status').innerText = "Updated!";
             });
+        }
+
+        function resetBoard() {
+            if(!confirm("⚠️ Are you sure? This will reset SCORES to 0 but keep names.")) return;
+            
+            // Clear only scores, keep names and colors
+            const resetIds = ['score', 'overs', 'target', 'p1Runs', 'p1Wkts', 'p2Runs', 'p2Wkts', 'p3Runs', 'p3Wkts', 'p4Runs', 'p4Wkts'];
+            resetIds.forEach(id => document.getElementById(id).value = "");
+            
+            // Uncheck boxes
+            checks.forEach(id => document.getElementById(id).checked = false);
+
+            updateScore(); // Push changes immediately
         }
     </script>
 </body>
