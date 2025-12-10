@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;800&display=swap');
 
         body { margin: 0; background: transparent; overflow: hidden; font-family: 'Exo 2', sans-serif; }
         
@@ -18,57 +18,50 @@
             border-radius: 8px;
             display: flex;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
             color: white;
             border-bottom: 2px solid #333;
         }
 
         /* 1. MATCH SCORE (Left - Fixed Width) */
         .main-stats {
-            flex: 0 0 180px; /* Fixed width */
+            flex: 0 0 190px;
             background: #19252b;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 0 15px;
             border-right: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 10;
         }
         
-        .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 2px;}
+        .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 17px; color: #fff; margin-bottom: 2px; text-transform: uppercase;}
         .score-line { display: flex; align-items: baseline; gap: 8px; }
-        .big-score { font-size: 28px; font-weight: 800; color: #ffeb3b; line-height: 1; }
-        .overs { font-size: 14px; color: #aaa; font-weight: 400; }
-        .target-tag { font-size: 10px; background: #d32f2f; padding: 2px 5px; border-radius: 3px; display: none; }
+        .big-score { font-size: 30px; font-weight: 800; color: #ffeb3b; line-height: 1; }
+        .overs { font-size: 15px; color: #aaa; font-weight: 400; }
+        .target-tag { font-size: 11px; background: #d32f2f; color:white; padding: 2px 5px; border-radius: 3px; display: none; font-weight: bold;}
 
         /* 2. PLAYERS WRAPPER */
         .players-wrapper {
             flex: 1;
             display: flex;
+            position: relative;
         }
 
-        /* TEAM BLUE SECTION */
-        .team-section-blue {
+        /* DYNAMIC TEAM SECTIONS */
+        .team-section {
             flex: 1;
-            background: linear-gradient(90deg, rgba(2,119,189,0.15) 0%, transparent 100%);
-            border-left: 4px solid #0277bd;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 0 15px;
+            position: relative;
+            transition: all 0.5s ease;
         }
 
-        /* TEAM RED SECTION */
-        .team-section-red {
-            flex: 1;
-            background: linear-gradient(90deg, transparent 0%, rgba(198,40,40,0.15) 100%);
-            border-right: 4px solid #c62828;
-            border-left: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 15px;
-        }
-
+        /* Glow effects generated via JS */
+        
         /* Player Row Style */
         .p-row {
             display: flex;
@@ -79,13 +72,18 @@
             color: #eee;
             padding: 3px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
         .p-row:last-child { border-bottom: none; }
         
-        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; text-transform: uppercase;}
+        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
         .p-stats { display: flex; gap: 10px; font-weight: 700; }
         .run-val { color: #fff; width: 30px; text-align: right; }
         .wkt-val { color: #ff8a80; width: 30px; text-align: right; }
+        
+        /* ICONS */
+        .icon-bat { font-size: 12px; filter: drop-shadow(0 0 2px #fff); }
+        .icon-ball { font-size: 10px; filter: drop-shadow(0 0 2px red); }
 
     </style>
 </head>
@@ -95,7 +93,7 @@
         
         <div class="main-stats">
             <div class="team-line">
-                <span id="teamBat">MATCH</span>
+                <span id="mainTeamName">MATCH</span>
                 <span id="targetBox" class="target-tag">TGT: 10</span>
             </div>
             <div class="score-line">
@@ -106,7 +104,7 @@
 
         <div class="players-wrapper">
             
-            <div class="team-section-blue">
+            <div class="team-section" id="team1Section">
                 <div class="p-row">
                     <span class="p-name" id="p1Name">Player 1</span>
                     <div class="p-stats">
@@ -123,7 +121,7 @@
                 </div>
             </div>
 
-            <div class="team-section-red">
+            <div class="team-section" id="team2Section">
                 <div class="p-row">
                     <span class="p-name" id="p3Name">Player 3</span>
                     <div class="p-stats">
@@ -145,7 +143,7 @@
     </div>
 
     <script>
-        // --- YOUR KEYS ---
+        // --- KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
         // -----------------
@@ -158,12 +156,32 @@
 
                 document.getElementById('container').style.display = "flex";
 
-                // Score
-                setText('teamBat', d.teamBat || "MATCH");
+                // 1. COLORS & GLOW LOGIC
+                const c1 = d.color1 || "#0277bd";
+                const c2 = d.color2 || "#c62828";
+
+                // Team 1 Styles (Gradient + Left Border + Glow)
+                const t1 = document.getElementById('team1Section');
+                t1.style.background = `linear-gradient(90deg, ${hexToRgba(c1, 0.4)} 0%, transparent 100%)`;
+                t1.style.borderLeft = `5px solid ${c1}`;
+                t1.style.boxShadow = `inset 10px 0 20px -10px ${c1}`; // Inner Glow
+
+                // Team 2 Styles (Gradient + Right Border + Glow)
+                const t2 = document.getElementById('team2Section');
+                t2.style.background = `linear-gradient(90deg, transparent 0%, ${hexToRgba(c2, 0.4)} 100%)`;
+                t2.style.borderRight = `5px solid ${c2}`;
+                t2.style.borderLeft = `1px solid rgba(255,255,255,0.1)`;
+                t2.style.boxShadow = `inset -10px 0 20px -10px ${c2}`; // Inner Glow
+
+                // 2. MAIN HEADER LOGIC (Who is batting?)
+                const batSide = d.battingSide || 'team1';
+                const mainName = batSide === 'team1' ? (d.team1Name || "TEAM 1") : (d.team2Name || "TEAM 2");
+                setText('mainTeamName', mainName);
+                
+                // Score & Target
                 setText('score', d.score || "0-0");
                 setText('overs', `(${d.overs || "0.0"})`);
                 
-                // Target
                 const tBox = document.getElementById('targetBox');
                 if(d.target && d.target > 0) {
                     tBox.style.display = "inline-block";
@@ -172,18 +190,41 @@
                     tBox.style.display = "none";
                 }
 
-                // Players (No sorting, strictly mapped)
-                setText('p1Name', d.p1Name || "P1"); setText('p1Runs', d.p1Runs || 0); setText('p1Wkts', d.p1Wkts || 0);
-                setText('p2Name', d.p2Name || "P2"); setText('p2Runs', d.p2Runs || 0); setText('p2Wkts', d.p2Wkts || 0);
-                setText('p3Name', d.p3Name || "P3"); setText('p3Runs', d.p3Runs || 0); setText('p3Wkts', d.p3Wkts || 0);
-                setText('p4Name', d.p4Name || "P4"); setText('p4Runs', d.p4Runs || 0); setText('p4Wkts', d.p4Wkts || 0);
+                // 3. PLAYERS & ICONS
+                updatePlayer(1, d); updatePlayer(2, d);
+                updatePlayer(3, d); updatePlayer(4, d);
 
             } catch (e) { console.log(e); }
+        }
+
+        function updatePlayer(num, d) {
+            const nameEl = document.getElementById(`p${num}Name`);
+            const rawName = d[`p${num}Name`] || `P${num}`;
+            const isBat = d[`p${num}Bat`];
+            const isBowl = d[`p${num}Bowl`];
+
+            // Build Name HTML with Icons
+            let html = rawName;
+            if(isBat) html = `<span class="icon-bat">🏏</span> ` + html;
+            if(isBowl) html += ` <span class="icon-ball">🔴</span>`;
+            
+            nameEl.innerHTML = html;
+            
+            setText(`p${num}Runs`, d[`p${num}Runs`] || 0);
+            setText(`p${num}Wkts`, d[`p${num}Wkts`] || 0);
         }
 
         function setText(id, txt) {
             const el = document.getElementById(id);
             if(el) el.innerText = txt;
+        }
+
+        // Helper to make transparent colors for gradients
+        function hexToRgba(hex, alpha) {
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
         setInterval(fetchScore, 3000);
