@@ -13,8 +13,6 @@
         
         label { font-size: 11px; font-weight: bold; color: #aaa; text-transform: uppercase; margin-bottom: 5px; display:block; }
         .team-header { padding: 8px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .icon-check { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 10px; color: #aaa; }
-        .icon-check input { width: 18px; height: 18px; accent-color: #00acee; }
 
         /* Batting Toggle */
         .toggle-container { display: flex; background: #333; border-radius: 6px; padding: 2px; }
@@ -58,15 +56,11 @@
         </div>
         <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
-            <label class="icon-check">🏏<input type="checkbox" id="p1Bat"></label>
-            <label class="icon-check">🔴<input type="checkbox" id="p1Bowl"></label>
             <input type="text" id="p1Name" placeholder="Player 1" style="flex:2">
             <input type="number" id="p1Runs" placeholder="R" style="flex:1">
             <input type="number" id="p1Wkts" placeholder="W" style="flex:1">
         </div>
         <div class="row">
-            <label class="icon-check">🏏<input type="checkbox" id="p2Bat"></label>
-            <label class="icon-check">🔴<input type="checkbox" id="p2Bowl"></label>
             <input type="text" id="p2Name" placeholder="Player 2" style="flex:2">
             <input type="number" id="p2Runs" placeholder="R" style="flex:1">
             <input type="number" id="p2Wkts" placeholder="W" style="flex:1">
@@ -80,15 +74,11 @@
         </div>
         <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
-            <label class="icon-check">🏏<input type="checkbox" id="p3Bat"></label>
-            <label class="icon-check">🔴<input type="checkbox" id="p3Bowl"></label>
             <input type="text" id="p3Name" placeholder="Player 3" style="flex:2">
             <input type="number" id="p3Runs" placeholder="R" style="flex:1">
             <input type="number" id="p3Wkts" placeholder="W" style="flex:1">
         </div>
         <div class="row">
-            <label class="icon-check">🏏<input type="checkbox" id="p4Bat"></label>
-            <label class="icon-check">🔴<input type="checkbox" id="p4Bowl"></label>
             <input type="text" id="p4Name" placeholder="Player 4" style="flex:2">
             <input type="number" id="p4Runs" placeholder="R" style="flex:1">
             <input type="number" id="p4Wkts" placeholder="W" style="flex:1">
@@ -109,7 +99,6 @@
         const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
-        const checks = ['p1Bat', 'p1Bowl', 'p2Bat', 'p2Bowl', 'p3Bat', 'p3Bowl', 'p4Bat', 'p4Bowl'];
 
         function setBatting(team) {
             document.getElementById('btnT1').className = team === 'team1' ? 'toggle-btn active' : 'toggle-btn';
@@ -128,7 +117,6 @@
             .then(res => res.json()).then(json => {
                 const d = json.record;
                 ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = d[id] || ""; });
-                checks.forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = d[id] || false; });
                 setBatting(d.battingSide || 'team1');
                 updateColors();
             });
@@ -137,7 +125,6 @@
             document.getElementById('btn').innerText = "Updating...";
             let data = {};
             ids.forEach(id => data[id] = document.getElementById(id).value);
-            checks.forEach(id => data[id] = document.getElementById(id).checked);
             data.battingSide = document.getElementById('batSide1').checked ? 'team1' : 'team2';
 
             fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -154,11 +141,7 @@
             // Clear only scores, keep names and colors
             const resetIds = ['score', 'overs', 'target', 'p1Runs', 'p1Wkts', 'p2Runs', 'p2Wkts', 'p3Runs', 'p3Wkts', 'p4Runs', 'p4Wkts'];
             resetIds.forEach(id => document.getElementById(id).value = "");
-            
-            // Uncheck boxes
-            checks.forEach(id => document.getElementById(id).checked = false);
-
-            updateScore(); // Push changes immediately
+            updateScore(); 
         }
     </script>
 </body>
