@@ -11,12 +11,9 @@
         input[type="text"], input[type="number"] { background: #2c2c2c; color: white; border: 1px solid #444; width: 100%; padding: 10px; border-radius: 6px; box-sizing: border-box; }
         input[type="color"] { border: none; width: 50px; height: 40px; cursor: pointer; background: transparent; }
         
-        /* Fixed Label Style */
         label { font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px; display:block; }
-        
         .team-header { padding: 8px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
-        /* Batting Toggle */
         .toggle-container { display: flex; background: #333; border-radius: 6px; padding: 2px; }
         .toggle-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; border-radius: 4px; color: #888; }
         .toggle-btn.active { background: #00acee; color: white; }
@@ -59,6 +56,14 @@
                 <input type="number" id="target" placeholder="0">
             </div>
         </div>
+        
+        <div class="row">
+            <div style="flex:1">
+                <label>Opponent / Previous Score</label>
+                <input type="text" id="oppScore" placeholder="e.g. PANGERS 24-2">
+            </div>
+        </div>
+
     </div>
 
     <div class="card" style="border-left: 4px solid #fff;" id="card1">
@@ -68,32 +73,14 @@
         </div>
         <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
-            <div style="flex:2">
-                <label>Player 1 Name</label>
-                <input type="text" id="p1Name" placeholder="Name">
-            </div>
-            <div style="flex:1">
-                <label>Runs</label>
-                <input type="number" id="p1Runs" placeholder="0">
-            </div>
-            <div style="flex:1">
-                <label>Wkts</label>
-                <input type="number" id="p1Wkts" placeholder="0">
-            </div>
+            <div style="flex:2"><label>P1 Name</label><input type="text" id="p1Name" placeholder="Name"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p1Runs" placeholder="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p1Wkts" placeholder="0"></div>
         </div>
         <div class="row">
-            <div style="flex:2">
-                <label>Player 2 Name</label>
-                <input type="text" id="p2Name" placeholder="Name">
-            </div>
-            <div style="flex:1">
-                <label>Runs</label>
-                <input type="number" id="p2Runs" placeholder="0">
-            </div>
-            <div style="flex:1">
-                <label>Wkts</label>
-                <input type="number" id="p2Wkts" placeholder="0">
-            </div>
+            <div style="flex:2"><label>P2 Name</label><input type="text" id="p2Name" placeholder="Name"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p2Runs" placeholder="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p2Wkts" placeholder="0"></div>
         </div>
     </div>
 
@@ -104,32 +91,14 @@
         </div>
         <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
-            <div style="flex:2">
-                <label>Player 3 Name</label>
-                <input type="text" id="p3Name" placeholder="Name">
-            </div>
-            <div style="flex:1">
-                <label>Runs</label>
-                <input type="number" id="p3Runs" placeholder="0">
-            </div>
-            <div style="flex:1">
-                <label>Wkts</label>
-                <input type="number" id="p3Wkts" placeholder="0">
-            </div>
+            <div style="flex:2"><label>P3 Name</label><input type="text" id="p3Name" placeholder="Name"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p3Runs" placeholder="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p3Wkts" placeholder="0"></div>
         </div>
         <div class="row">
-            <div style="flex:2">
-                <label>Player 4 Name</label>
-                <input type="text" id="p4Name" placeholder="Name">
-            </div>
-            <div style="flex:1">
-                <label>Runs</label>
-                <input type="number" id="p4Runs" placeholder="0">
-            </div>
-            <div style="flex:1">
-                <label>Wkts</label>
-                <input type="number" id="p4Wkts" placeholder="0">
-            </div>
+            <div style="flex:2"><label>P4 Name</label><input type="text" id="p4Name" placeholder="Name"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p4Runs" placeholder="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p4Wkts" placeholder="0"></div>
         </div>
     </div>
 
@@ -144,7 +113,7 @@
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
         // ------------
 
-        const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 
+        const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 'oppScore',
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
 
@@ -185,9 +154,7 @@
 
         function resetBoard() {
             if(!confirm("⚠️ Are you sure? This will reset SCORES to 0 but keep names.")) return;
-            
-            // Clear only scores, keep names and colors
-            const resetIds = ['score', 'overs', 'target', 'p1Runs', 'p1Wkts', 'p2Runs', 'p2Wkts', 'p3Runs', 'p3Wkts', 'p4Runs', 'p4Wkts'];
+            const resetIds = ['score', 'overs', 'target', 'oppScore', 'p1Runs', 'p1Wkts', 'p2Runs', 'p2Wkts', 'p3Runs', 'p3Wkts', 'p4Runs', 'p4Wkts'];
             resetIds.forEach(id => document.getElementById(id).value = "");
             updateScore(); 
         }
