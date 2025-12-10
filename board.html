@@ -11,13 +11,14 @@
             bottom: 30px;
             left: 20px;
             right: 20px;
-            height: 85px; /* Slightly taller to fit Team Headers */
+            height: 90px; /* Increased height to fit Leaderboard Title */
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             pointer-events: none;
         }
 
+        /* Base Card Styling */
         .card-base {
             background: #0f2027;
             border-radius: 8px;
@@ -25,14 +26,13 @@
             color: white;
             overflow: hidden;
             pointer-events: auto;
-            height: 100%;
-            display: flex;
             border-bottom: 3px solid #333;
         }
 
         /* --- LEFT: MATCH SCORE --- */
         .score-card {
             width: 220px;
+            height: 70px; /* Fixed height matches old size */
             background: #19252b;
             display: flex;
             flex-direction: column;
@@ -50,8 +50,27 @@
 
         /* --- RIGHT: LEADERBOARD --- */
         .leaderboard-card {
-            width: 500px; /* Adjusted width */
+            width: 500px; 
+            height: 100%; /* Fills the 90px wrapper */
             display: flex;
+            flex-direction: column; /* Stack Title on top */
+        }
+
+        /* The Main "Leaderboard" Title Box */
+        .lb-main-title {
+            background: #000;
+            color: #888;
+            font-size: 10px;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: bold;
+            padding: 2px 0;
+            text-transform: uppercase;
+        }
+
+        .lb-content {
+            display: flex;
+            flex: 1;
         }
 
         .team-section {
@@ -60,14 +79,15 @@
             flex-direction: column;
             position: relative;
             transition: all 0.5s ease;
+            justify-content: center; /* Center rows vertically */
         }
 
-        /* NEW: Team Headers inside Leaderboard */
+        /* Team Name Headings (Rangers/Pangers) */
         .lb-header {
             font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
-            padding: 4px 10px;
+            padding: 2px 10px;
             background: rgba(0,0,0,0.3);
             color: rgba(255,255,255,0.7);
             letter-spacing: 1px;
@@ -81,7 +101,7 @@
             font-size: 14px;
             font-weight: 600;
             color: #eee;
-            padding: 4px 10px;
+            padding: 3px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
@@ -114,45 +134,45 @@
 
         <div class="card-base leaderboard-card">
             
-            <div class="team-section" id="team1Section">
-                <div class="lb-header" id="t1Header">TEAM 1</div>
-                
-                <div class="p-row">
-                    <span class="p-name" id="p1Name">P1</span>
-                    <div class="p-stats">
-                        <span class="run-val" id="p1Runs">0</span>
-                        <span class="wkt-val"><span id="p1Wkts">0</span>W</span>
-                    </div>
-                </div>
-                <div class="p-row">
-                    <span class="p-name" id="p2Name">P2</span>
-                    <div class="p-stats">
-                        <span class="run-val" id="p2Runs">0</span>
-                        <span class="wkt-val"><span id="p2Wkts">0</span>W</span>
-                    </div>
-                </div>
-            </div>
+            <div class="lb-main-title">LEADERBOARD</div>
 
-            <div class="team-section" id="team2Section">
-                <div class="lb-header" id="t2Header" style="text-align:right;">TEAM 2</div>
-
-                <div class="p-row">
-                    <span class="p-name" id="p3Name">P3</span>
-                    <div class="p-stats">
-                        <span class="run-val" id="p3Runs">0</span>
-                        <span class="wkt-val"><span id="p3Wkts">0</span>W</span>
+            <div class="lb-content">
+                <div class="team-section" id="team1Section">
+                    <div class="lb-header" id="t1Header">TEAM 1</div>
+                    <div class="p-row">
+                        <span class="p-name" id="p1Name">P1</span>
+                        <div class="p-stats">
+                            <span class="run-val" id="p1Runs">0</span>
+                            <span class="wkt-val"><span id="p1Wkts">0</span>W</span>
+                        </div>
+                    </div>
+                    <div class="p-row">
+                        <span class="p-name" id="p2Name">P2</span>
+                        <div class="p-stats">
+                            <span class="run-val" id="p2Runs">0</span>
+                            <span class="wkt-val"><span id="p2Wkts">0</span>W</span>
+                        </div>
                     </div>
                 </div>
-                <div class="p-row">
-                    <span class="p-name" id="p4Name">P4</span>
-                    <div class="p-stats">
-                        <span class="run-val" id="p4Runs">0</span>
-                        <span class="wkt-val"><span id="p4Wkts">0</span>W</span>
+
+                <div class="team-section" id="team2Section">
+                    <div class="lb-header" id="t2Header" style="text-align:right;">TEAM 2</div>
+                    <div class="p-row">
+                        <span class="p-name" id="p3Name">P3</span>
+                        <div class="p-stats">
+                            <span class="run-val" id="p3Runs">0</span>
+                            <span class="wkt-val"><span id="p3Wkts">0</span>W</span>
+                        </div>
+                    </div>
+                    <div class="p-row">
+                        <span class="p-name" id="p4Name">P4</span>
+                        <div class="p-stats">
+                            <span class="run-val" id="p4Runs">0</span>
+                            <span class="wkt-val"><span id="p4Wkts">0</span>W</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-        </div>
+            </div> </div>
 
     </div>
 
@@ -170,7 +190,7 @@
 
                 document.getElementById('container').style.display = "flex";
 
-                // 1. COLORS
+                // COLORS
                 const c1 = d.color1 || "#0277bd";
                 const c2 = d.color2 || "#c62828";
 
@@ -179,7 +199,7 @@
                 t1.style.background = `linear-gradient(90deg, ${hexToRgba(c1, 0.4)} 0%, transparent 100%)`;
                 t1.style.borderLeft = `5px solid ${c1}`;
                 t1.style.boxShadow = `inset 10px 0 20px -10px ${c1}`;
-                document.getElementById('t1Header').style.color = c1; // Text matches team color
+                document.getElementById('t1Header').style.color = c1;
 
                 // Team 2 Styles
                 const t2 = document.getElementById('team2Section');
@@ -187,14 +207,13 @@
                 t2.style.borderRight = `5px solid ${c2}`;
                 t2.style.borderLeft = `1px solid rgba(255,255,255,0.1)`;
                 t2.style.boxShadow = `inset -10px 0 20px -10px ${c2}`;
-                document.getElementById('t2Header').style.color = c2; // Text matches team color
+                document.getElementById('t2Header').style.color = c2;
 
-                // 2. TEXT UPDATES
+                // TEXT UPDATES
                 const batSide = d.battingSide || 'team1';
                 const mainName = batSide === 'team1' ? (d.team1Name || "TEAM 1") : (d.team2Name || "TEAM 2");
                 setText('mainTeamName', mainName);
                 
-                // NEW: Update Leaderboard Headers
                 setText('t1Header', d.team1Name || "TEAM 1");
                 setText('t2Header', d.team2Name || "TEAM 2");
 
