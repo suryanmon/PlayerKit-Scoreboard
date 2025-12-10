@@ -2,54 +2,194 @@
 <html>
 <head>
     <style>
-        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Arial', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+
+        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Roboto', sans-serif; }
         
+        /* Main Container */
         .scoreboard {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: linear-gradient(90deg, #004d40 0%, #00695c 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            border: 2px solid white;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 1200px;
+            height: 70px;
             display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0px 4px 6px rgba(0,0,0,0.5);
-            white-space: nowrap; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            color: white;
+            /* Default background, will be overridden by JS */
+            background-color: #0d1b54; 
         }
 
-        /* Typography */
-        .team-name { color: #ffeb3b; font-weight: 900; font-size: 24px; text-transform: uppercase; }
-        .score { font-size: 28px; font-weight: bold; }
-        .divider { color: #80cbc4; font-size: 24px; opacity: 0.6; }
+        /* --- SECTIONS --- */
         
-        .details { display: flex; flex-direction: column; justify-content: center; font-size: 14px; font-weight: bold; color: #b2dfdb; }
-        .target-label { color: #ff8a80; } /* Light red for target */
+        /* Left: Batting Team */
+        .batting-section {
+            flex: 3;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        /* Center: Status (Toss/Target) */
+        .status-section {
+            flex: 1.2;
+            background: linear-gradient(180deg, #aaddff 0%, #ffffff 100%);
+            color: #002244;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.2;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+            margin-left: -20px; /* Overlap effect */
+            z-index: 2;
+        }
+
+        /* Right: Bowling Team */
+        .bowling-section {
+            flex: 2.5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-right: 15px;
+            padding-left: 20px;
+            background: rgba(0,0,0,0.2); /* Slightly darker */
+        }
+
+        /* --- ELEMENTS --- */
+
+        /* Team Name & Overs */
+        .team-block {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        .team-name { font-size: 22px; font-weight: 400; text-transform: uppercase; }
+        .over-count { font-size: 14px; opacity: 0.9; display: flex; align-items: center; gap: 5px; }
+        .pp-badge { background: #00acee; color: white; padding: 1px 4px; border-radius: 2px; font-size: 10px; font-weight: bold; }
+
+        /* MAIN SCORE */
+        .main-score {
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffcc00; /* Gold color */
+            margin-right: 20px;
+            letter-spacing: -1px;
+        }
+
+        /* Batsmen Names */
+        .batsmen-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            border-left: 1px solid rgba(255,255,255,0.3);
+            padding-left: 15px;
+            height: 70%;
+        }
+        .batsman { display: flex; justify-content: space-between; width: 140px; margin-bottom: 2px; }
+        .batsman span:last-child { opacity: 0.8; font-weight: 400; }
+        .striker-indicator { color: #ffcc00; margin-right: 4px; display: none;} 
+        
+        /* Bowling Side */
+        .vs-team { font-size: 20px; font-weight: 400; margin-right: 15px; opacity: 0.9; }
+        
+        .bowler-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-right: 15px;
+            border-right: 1px solid rgba(255,255,255,0.3);
+            padding-right: 15px;
+        }
+        .bowler-name { font-size: 16px; font-weight: 700; text-transform: uppercase; }
+        .bowler-stats { font-size: 14px; }
+
+        /* Ball by Ball Boxes */
+        .this-over {
+            display: flex;
+            gap: 3px;
+        }
+        .ball {
+            width: 22px;
+            height: 22px;
+            background: white;
+            color: #333;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 2px;
+        }
+        .ball.wick { background: #d32f2f; color: white; }
+        .ball.four { background: #0288d1; color: white; }
+        .ball.six { background: #388e3c; color: white; }
 
     </style>
 </head>
 <body>
 
     <div class="scoreboard" id="board">
-        <span id="teamDisplay" class="team-name">TEAM</span>
         
-        <span id="scoreDisplay" class="score">0/0</span>
-        
-        <span class="divider">|</span>
+        <div class="batting-section">
+            <div class="team-block">
+                <div class="team-name" id="batTeam">AUS</div>
+                <div class="over-count">
+                    <span id="overs">0.0</span>
+                    <span class="pp-badge" id="pp" style="display:none">P</span>
+                </div>
+            </div>
 
-        <div class="details">
-            <span id="overDisplay">OV: 0.0</span>
-            <span id="targetContainer" style="display:none;">Target: <span id="targetDisplay" class="target-label">0</span></span>
+            <div class="main-score" id="score">0-0</div>
+
+            <div class="batsmen-list">
+                <div class="batsman">
+                    <div><span class="striker-indicator">►</span><span id="bat1">BAT 1</span></div>
+                    <span id="bat1Sc">0(0)</span>
+                </div>
+                <div class="batsman">
+                    <div><span id="bat2">BAT 2</span></div>
+                    <span id="bat2Sc">0(0)</span>
+                </div>
+            </div>
         </div>
+
+        <div class="status-section">
+            <span id="matchStatus">MATCH START</span>
+        </div>
+
+        <div class="bowling-section">
+            <div class="vs-team">v <span id="bowlTeam">IND</span></div>
+
+            <div style="display:flex; align-items:center;">
+                <div class="bowler-info">
+                    <span class="bowler-name" id="bowler">BOWLER</span>
+                    <span class="bowler-stats"><span id="bowlerFigs">0-0</span> <span style="opacity:0.6" id="bowlerOvers">0.0</span></span>
+                </div>
+                
+                <div class="this-over" id="ballContainer">
+                    </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // --- YOUR KEYS ARE SET BELOW ---
+        // --- KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // -------------------------------
+        // ------------
 
         async function fetchScore() {
             try {
@@ -59,33 +199,71 @@
                 const json = await response.json();
                 const data = json.record;
 
-                // 1. Prepare Data
-                const teamText = data.team || "TEAM"; 
-                const scoreText = `${data.runs}/${data.wickets}`;
-                const overText = `OV: ${data.overs}`;
-                const targetVal = data.target;
+                // 1. Theme Color
+                if(data.themeColor) document.getElementById('board').style.backgroundColor = data.themeColor;
 
-                // 2. Update Elements
-                const teamEl = document.getElementById('teamDisplay');
-                const scoreEl = document.getElementById('scoreDisplay');
-                const overEl = document.getElementById('overDisplay');
-                const targetContainer = document.getElementById('targetContainer');
-                const targetEl = document.getElementById('targetDisplay');
-
-                // Update Text (Only changes the number, no flashing)
-                if (teamEl.innerText !== teamText) teamEl.innerText = teamText;
-                if (scoreEl.innerText !== scoreText) scoreEl.innerText = scoreText;
-                if (overEl.innerText !== overText) overEl.innerText = overText;
-
-                // Handle Target Visibility
-                if (targetVal && targetVal > 0) {
-                    targetContainer.style.display = "block";
-                    targetEl.innerText = targetVal;
+                // 2. Batting Stats
+                setText('batTeam', data.batTeam);
+                setText('score', `${data.runs}-${data.wickets}`);
+                setText('overs', data.overs);
+                
+                // Powerplay Badge
+                const ppEl = document.getElementById('pp');
+                if(data.pp && data.pp.trim() !== "") {
+                    ppEl.style.display = "inline-block";
+                    ppEl.innerText = data.pp;
                 } else {
-                    targetContainer.style.display = "none";
+                    ppEl.style.display = "none";
+                }
+
+                // Batsmen
+                setText('bat1', data.bat1);
+                setText('bat1Sc', `${data.bat1Runs}(${data.bat1Balls})`);
+                setText('bat2', data.bat2);
+                setText('bat2Sc', `${data.bat2Runs}(${data.bat2Balls})`);
+
+                // 3. Center Status
+                setText('matchStatus', data.matchStatus);
+
+                // 4. Bowling Stats
+                setText('bowlTeam', data.bowlTeam);
+                setText('bowler', data.bowler);
+                setText('bowlerFigs', data.bowlerFigs);
+                setText('bowlerOvers', data.bowlerOvers);
+
+                // 5. This Over (Ball Logic)
+                const ballContainer = document.getElementById('ballContainer');
+                const rawBalls = data.thisOver || "";
+                
+                // Only redraw if changed (basic check)
+                if(ballContainer.dataset.raw !== rawBalls) {
+                    ballContainer.innerHTML = ""; // Clear old
+                    ballContainer.dataset.raw = rawBalls;
+                    
+                    if(rawBalls.trim() !== "") {
+                        const balls = rawBalls.split(',');
+                        balls.forEach(b => {
+                            const val = b.trim();
+                            const div = document.createElement('div');
+                            div.className = 'ball';
+                            div.innerText = val;
+                            
+                            // Colors for events
+                            if(val.toLowerCase().includes('w')) div.className += ' wick';
+                            else if(val === '4') div.className += ' four';
+                            else if(val === '6') div.className += ' six';
+                            
+                            ballContainer.appendChild(div);
+                        });
+                    }
                 }
 
             } catch (error) { console.log('Error fetching score'); }
+        }
+
+        function setText(id, val) {
+            const el = document.getElementById(id);
+            if(el && val !== undefined) el.innerText = val;
         }
 
         setInterval(fetchScore, 3000);
