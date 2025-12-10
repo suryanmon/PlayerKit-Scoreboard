@@ -1,31 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2v2 Split Controller</title>
+    <title>2v2 Pro Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: sans-serif; background: #eef2f5; padding: 15px; max-width: 500px; margin: auto; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        label { font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 5px; display:block; }
+        body { font-family: sans-serif; background: #121212; color: white; padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: #1e1e1e; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 15px; border: 1px solid #333; }
         
-        .team-header { padding: 5px 10px; border-radius: 4px; color: white; margin-bottom: 10px; font-weight: bold; text-align: center; }
-        .blue-h { background: #0277bd; }
-        .red-h { background: #c62828; }
+        .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
+        input[type="text"], input[type="number"] { background: #2c2c2c; color: white; border: 1px solid #444; width: 100%; padding: 10px; border-radius: 6px; box-sizing: border-box; }
+        input[type="color"] { border: none; width: 50px; height: 40px; cursor: pointer; background: transparent; }
+        
+        label { font-size: 11px; font-weight: bold; color: #aaa; text-transform: uppercase; margin-bottom: 5px; display:block; }
+        
+        /* Headers */
+        .team-header { padding: 8px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        /* Checkboxes */
+        .icon-check { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 10px; color: #aaa; }
+        .icon-check input { width: 18px; height: 18px; accent-color: #00acee; }
 
-        button { width: 100%; padding: 15px; background: #222; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        /* Batting Toggle */
+        .toggle-container { display: flex; background: #333; border-radius: 6px; padding: 2px; }
+        .toggle-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; border-radius: 4px; color: #888; }
+        .toggle-btn.active { background: #00acee; color: white; }
+        input[type="radio"] { display: none; }
+
+        button { width: 100%; padding: 15px; background: #00acee; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(0, 172, 238, 0.4); }
+        button:hover { background: #008cc9; }
+
     </style>
 </head>
 <body>
-    <h3 style="text-align:center; margin:0 0 15px 0;">Match Controller</h3>
+    <h3 style="text-align:center; margin:0 0 15px 0;">🏏 Pro Controller</h3>
 
     <div class="card">
-        <label>MATCH STATUS</label>
-        <div class="row">
-            <input type="text" id="teamBat" placeholder="Team Blue Name" style="border-left: 4px solid #0277bd;">
-            <input type="text" id="teamBowl" placeholder="Team Red Name" style="border-left: 4px solid #c62828;">
+        <label>Who is Batting Now?</label>
+        <div class="toggle-container">
+            <label class="toggle-btn active" id="btnT1" onclick="setBatting('team1')">
+                TEAM 1 (Left)
+                <input type="radio" name="batSide" id="batSide1" value="team1" checked>
+            </label>
+            <label class="toggle-btn" id="btnT2" onclick="setBatting('team2')">
+                TEAM 2 (Right)
+                <input type="radio" name="batSide" id="batSide2" value="team2">
+            </label>
         </div>
+
+        <label style="margin-top:10px;">Match Stats</label>
         <div class="row">
             <input type="text" id="score" placeholder="Score (e.g. 45-1)">
             <input type="text" id="overs" placeholder="Overs (0.0)">
@@ -33,35 +55,53 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="team-header blue-h">TEAM BLUE (Left Side)</div>
+    <div class="card" style="border-left: 4px solid #fff;" id="card1">
+        <div class="team-header">
+            <span>TEAM 1 (Left)</span>
+            <input type="color" id="color1" value="#0277bd" onchange="updateColors()">
+        </div>
+        <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
+        
         <div class="row">
-            <input type="text" id="p1Name" placeholder="Player 1 Name" style="flex:2">
+            <label class="icon-check">🏏<input type="checkbox" id="p1Bat"></label>
+            <label class="icon-check">🔴<input type="checkbox" id="p1Bowl"></label>
+            <input type="text" id="p1Name" placeholder="Player 1" style="flex:2">
             <input type="number" id="p1Runs" placeholder="R" style="flex:1">
             <input type="number" id="p1Wkts" placeholder="W" style="flex:1">
         </div>
         <div class="row">
-            <input type="text" id="p2Name" placeholder="Player 2 Name" style="flex:2">
+            <label class="icon-check">🏏<input type="checkbox" id="p2Bat"></label>
+            <label class="icon-check">🔴<input type="checkbox" id="p2Bowl"></label>
+            <input type="text" id="p2Name" placeholder="Player 2" style="flex:2">
             <input type="number" id="p2Runs" placeholder="R" style="flex:1">
             <input type="number" id="p2Wkts" placeholder="W" style="flex:1">
         </div>
     </div>
 
-    <div class="card">
-        <div class="team-header red-h">TEAM RED (Right Side)</div>
+    <div class="card" style="border-right: 4px solid #fff;" id="card2">
+        <div class="team-header">
+            <span>TEAM 2 (Right)</span>
+            <input type="color" id="color2" value="#c62828" onchange="updateColors()">
+        </div>
+        <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
+        
         <div class="row">
-            <input type="text" id="p3Name" placeholder="Player 3 Name" style="flex:2">
+            <label class="icon-check">🏏<input type="checkbox" id="p3Bat"></label>
+            <label class="icon-check">🔴<input type="checkbox" id="p3Bowl"></label>
+            <input type="text" id="p3Name" placeholder="Player 3" style="flex:2">
             <input type="number" id="p3Runs" placeholder="R" style="flex:1">
             <input type="number" id="p3Wkts" placeholder="W" style="flex:1">
         </div>
         <div class="row">
-            <input type="text" id="p4Name" placeholder="Player 4 Name" style="flex:2">
+            <label class="icon-check">🏏<input type="checkbox" id="p4Bat"></label>
+            <label class="icon-check">🔴<input type="checkbox" id="p4Bowl"></label>
+            <input type="text" id="p4Name" placeholder="Player 4" style="flex:2">
             <input type="number" id="p4Runs" placeholder="R" style="flex:1">
             <input type="number" id="p4Wkts" placeholder="W" style="flex:1">
         </div>
     </div>
 
-    <button onclick="updateScore()" id="btn">UPDATE SCOREBOARD</button>
+    <button onclick="updateScore()" id="btn">UPDATE BROADCAST</button>
     <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Ready</div>
 
     <script>
@@ -70,26 +110,49 @@
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
         // ------------
 
-        const ids = ['teamBat', 'teamBowl', 'score', 'overs', 'target', 
+        const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
+
+        const checks = ['p1Bat', 'p1Bowl', 'p2Bat', 'p2Bowl', 'p3Bat', 'p3Bowl', 'p4Bat', 'p4Bowl'];
+
+        function setBatting(team) {
+            document.getElementById('btnT1').className = team === 'team1' ? 'toggle-btn active' : 'toggle-btn';
+            document.getElementById('btnT2').className = team === 'team2' ? 'toggle-btn active' : 'toggle-btn';
+            document.getElementById('batSide1').checked = (team === 'team1');
+            document.getElementById('batSide2').checked = (team === 'team2');
+        }
+
+        function updateColors() {
+            document.getElementById('card1').style.borderColor = document.getElementById('color1').value;
+            document.getElementById('card2').style.borderColor = document.getElementById('color2').value;
+        }
 
         // Load Data
         fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {headers: {'X-Master-Key': API_KEY}})
             .then(res => res.json()).then(json => {
                 const d = json.record;
                 ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = d[id] || ""; });
+                checks.forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = d[id] || false; });
+                
+                // Set Toggle State
+                setBatting(d.battingSide || 'team1');
+                updateColors();
             });
 
         function updateScore() {
             document.getElementById('btn').innerText = "Updating...";
             let data = {};
             ids.forEach(id => data[id] = document.getElementById(id).value);
+            checks.forEach(id => data[id] = document.getElementById(id).checked);
+            
+            // Save toggle state
+            data.battingSide = document.getElementById('batSide1').checked ? 'team1' : 'team2';
 
             fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data)
             }).then(() => {
-                document.getElementById('btn').innerText = "UPDATE SCOREBOARD";
+                document.getElementById('btn').innerText = "UPDATE BROADCAST";
                 document.getElementById('status').innerText = "Updated!";
             });
         }
