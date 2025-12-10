@@ -6,24 +6,22 @@
 
         body { margin: 0; background: transparent; overflow: hidden; font-family: 'Exo 2', sans-serif; }
         
-        /* 1. Main Wrapper (Invisible, holds the two sides) */
         .screen-wrapper {
             position: fixed;
             bottom: 30px;
             left: 20px;
             right: 20px;
-            height: 70px;
+            height: 85px; /* Slightly taller to fit Team Headers */
             display: flex;
-            justify-content: space-between; /* Pushes items to far edges */
+            justify-content: space-between;
             align-items: flex-end;
-            pointer-events: none; /* Lets clicks pass through the middle gap */
+            pointer-events: none;
         }
 
-        /* Common Card Style */
         .card-base {
             background: #0f2027;
             border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.9);
             color: white;
             overflow: hidden;
             pointer-events: auto;
@@ -32,9 +30,9 @@
             border-bottom: 3px solid #333;
         }
 
-        /* --- LEFT SIDE: MATCH SCORE --- */
+        /* --- LEFT: MATCH SCORE --- */
         .score-card {
-            width: 220px; /* Fixed width for score */
+            width: 220px;
             background: #19252b;
             display: flex;
             flex-direction: column;
@@ -46,28 +44,36 @@
 
         .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 2px; text-transform: uppercase;}
         .score-line { display: flex; align-items: baseline; gap: 8px; }
-        .big-score { font-size: 32px; font-weight: 800; color: #ffeb3b; line-height: 1; }
+        .big-score { font-size: 34px; font-weight: 800; color: #ffeb3b; line-height: 1; }
         .overs { font-size: 16px; color: #aaa; font-weight: 400; }
-        .target-tag { font-size: 11px; background: #d32f2f; color:white; padding: 2px 6px; border-radius: 3px; display: none; font-weight: bold; position: absolute; right: 20px; top: 18px;}
+        .target-tag { font-size: 11px; background: #d32f2f; color:white; padding: 2px 6px; border-radius: 3px; display: none; font-weight: bold; position: absolute; right: 20px; top: 22px;}
 
-        /* --- RIGHT SIDE: LEADERBOARD --- */
+        /* --- RIGHT: LEADERBOARD --- */
         .leaderboard-card {
-            width: 600px; /* Width for players */
+            width: 500px; /* Adjusted width */
             display: flex;
         }
 
-        /* Team Sections */
         .team-section {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            padding: 0 15px;
             position: relative;
             transition: all 0.5s ease;
         }
 
-        /* Player Rows */
+        /* NEW: Team Headers inside Leaderboard */
+        .lb-header {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: rgba(0,0,0,0.3);
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
         .p-row {
             display: flex;
             justify-content: space-between;
@@ -75,18 +81,17 @@
             font-size: 14px;
             font-weight: 600;
             color: #eee;
-            padding: 3px 0;
+            padding: 4px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
         .p-row:last-child { border-bottom: none; }
         
-        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
         .p-stats { display: flex; gap: 10px; font-weight: 700; }
-        .run-val { color: #fff; width: 30px; text-align: right; }
-        .wkt-val { color: #ff8a80; width: 30px; text-align: right; }
+        .run-val { color: #fff; width: 25px; text-align: right; }
+        .wkt-val { color: #ff8a80; width: 25px; text-align: right; }
         
-        /* ICONS */
         .icon-bat { font-size: 12px; filter: drop-shadow(0 0 2px #fff); }
         .icon-ball { font-size: 10px; filter: drop-shadow(0 0 2px red); }
 
@@ -110,15 +115,17 @@
         <div class="card-base leaderboard-card">
             
             <div class="team-section" id="team1Section">
+                <div class="lb-header" id="t1Header">TEAM 1</div>
+                
                 <div class="p-row">
-                    <span class="p-name" id="p1Name">Player 1</span>
+                    <span class="p-name" id="p1Name">P1</span>
                     <div class="p-stats">
                         <span class="run-val" id="p1Runs">0</span>
                         <span class="wkt-val"><span id="p1Wkts">0</span>W</span>
                     </div>
                 </div>
                 <div class="p-row">
-                    <span class="p-name" id="p2Name">Player 2</span>
+                    <span class="p-name" id="p2Name">P2</span>
                     <div class="p-stats">
                         <span class="run-val" id="p2Runs">0</span>
                         <span class="wkt-val"><span id="p2Wkts">0</span>W</span>
@@ -127,15 +134,17 @@
             </div>
 
             <div class="team-section" id="team2Section">
+                <div class="lb-header" id="t2Header" style="text-align:right;">TEAM 2</div>
+
                 <div class="p-row">
-                    <span class="p-name" id="p3Name">Player 3</span>
+                    <span class="p-name" id="p3Name">P3</span>
                     <div class="p-stats">
                         <span class="run-val" id="p3Runs">0</span>
                         <span class="wkt-val"><span id="p3Wkts">0</span>W</span>
                     </div>
                 </div>
                 <div class="p-row">
-                    <span class="p-name" id="p4Name">Player 4</span>
+                    <span class="p-name" id="p4Name">P4</span>
                     <div class="p-stats">
                         <span class="run-val" id="p4Runs">0</span>
                         <span class="wkt-val"><span id="p4Wkts">0</span>W</span>
@@ -161,7 +170,7 @@
 
                 document.getElementById('container').style.display = "flex";
 
-                // 1. COLORS & GLOW LOGIC
+                // 1. COLORS
                 const c1 = d.color1 || "#0277bd";
                 const c2 = d.color2 || "#c62828";
 
@@ -170,6 +179,7 @@
                 t1.style.background = `linear-gradient(90deg, ${hexToRgba(c1, 0.4)} 0%, transparent 100%)`;
                 t1.style.borderLeft = `5px solid ${c1}`;
                 t1.style.boxShadow = `inset 10px 0 20px -10px ${c1}`;
+                document.getElementById('t1Header').style.color = c1; // Text matches team color
 
                 // Team 2 Styles
                 const t2 = document.getElementById('team2Section');
@@ -177,13 +187,17 @@
                 t2.style.borderRight = `5px solid ${c2}`;
                 t2.style.borderLeft = `1px solid rgba(255,255,255,0.1)`;
                 t2.style.boxShadow = `inset -10px 0 20px -10px ${c2}`;
+                document.getElementById('t2Header').style.color = c2; // Text matches team color
 
-                // 2. MAIN HEADER LOGIC
+                // 2. TEXT UPDATES
                 const batSide = d.battingSide || 'team1';
                 const mainName = batSide === 'team1' ? (d.team1Name || "TEAM 1") : (d.team2Name || "TEAM 2");
                 setText('mainTeamName', mainName);
                 
-                // Score & Target
+                // NEW: Update Leaderboard Headers
+                setText('t1Header', d.team1Name || "TEAM 1");
+                setText('t2Header', d.team2Name || "TEAM 2");
+
                 setText('score', d.score || "0-0");
                 setText('overs', `(${d.overs || "0.0"})`);
                 
@@ -195,7 +209,6 @@
                     tBox.style.display = "none";
                 }
 
-                // 3. PLAYERS & ICONS
                 updatePlayer(1, d); updatePlayer(2, d);
                 updatePlayer(3, d); updatePlayer(4, d);
 
