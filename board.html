@@ -2,130 +2,121 @@
 <html>
 <head>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;800&display=swap');
 
-        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Roboto Condensed', sans-serif; }
+        body { margin: 0; background: transparent; overflow: hidden; font-family: 'Exo 2', sans-serif; }
         
-        .container {
+        .scoreboard-container {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
+            width: 98%;
+            max-width: 850px;
+            height: 70px; /* Fixed compact height */
+            background: linear-gradient(90deg, #0f2027 0%, #203a43 50%, #2c5364 100%); /* Official TV Gradient */
+            border-radius: 8px;
             display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        /* HEADER BAR */
-        .header-bar {
-            display: flex;
-            height: 50px; /* Slightly taller to fit Target */
-            border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .bat-side {
-            flex: 1;
-            background: #0056b3; /* Blue */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            border-bottom: 3px solid #00acee; /* Highlight strip */
             color: white;
-            display: flex;
-            align-items: center;
-            padding-left: 15px;
-            font-size: 18px;
-        }
-        
-        /* The Middle Score Box */
-        .score-middle {
-            flex: 0 0 130px; /* Width */
-            background: #111;
-            color: #ffeb3b;
-            display: flex;
-            flex-direction: column; /* Stack items vertically */
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-        
-        .target-txt { font-size: 12px; color: #ffab91; margin-bottom: 2px; display:none; } /* Orange Target */
-        .main-score { font-size: 26px; }
-        .overs-small { font-size: 12px; color: #ccc; margin-top: 2px;}
-
-        .bowl-side {
-            flex: 1;
-            background: #d32f2f; /* Red */
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 15px;
-            font-size: 18px;
         }
 
-        /* PLAYER LIST */
-        .player-list {
+        /* SECTION 1: MAIN SCORE (Left) */
+        .main-stats {
+            flex: 1.2;
+            background: rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            justify-content: center;
+            padding-left: 15px;
+            padding-right: 15px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+        
+        .team-line { display: flex; align-items: center; justify-content: space-between; font-weight: 700; text-transform: uppercase; font-size: 18px; color: #fff;}
+        .score-line { display: flex; align-items: baseline; gap: 8px; margin-top: -2px;}
+        .big-score { font-size: 32px; font-weight: 800; color: #ffeb3b; line-height: 1; }
+        .overs { font-size: 16px; color: #ccc; font-weight: 400; }
+        
+        /* Target Tag (Now inside the box, won't cut off) */
+        .target-tag { 
+            font-size: 11px; 
+            background: #d32f2f; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+            text-transform: uppercase; 
+            font-weight: bold;
+            display: none; /* Hidden if 0 */
         }
 
-        .player-row {
-            background: rgba(255,255,255,0.9);
-            padding: 4px 12px;
-            border-radius: 4px;
+        /* SECTION 2: 4 PLAYERS (Right - Horizontal Grid) */
+        .players-area {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .player-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns */
+            grid-template-rows: 1fr 1fr;    /* 2 rows */
+            gap: 2px 15px; /* Gap between items */
+        }
+
+        .p-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            font-size: 13px;
+            font-weight: 600;
+            color: #e0e0e0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 2px 0;
         }
+        
+        /* MVP Styling (Top Performer) */
+        .p-item.mvp { color: #ffd700; text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); font-weight: 700; }
 
-        /* MVP Styling */
-        .mvp {
-            background: linear-gradient(90deg, #FFD700, #ffecb3);
-            border-left: 4px solid #b8860b;
-        }
-
-        .p-right span { margin-left: 8px; }
-        .run-txt { font-size: 15px; }
-        .wkt-txt { color: #c62828; }
-        .bat-icon { display: none; margin-right: 5px; color: #333; }
-        .batting .bat-icon { display: inline; }
+        .p-stats span { margin-left: 5px; }
+        .run-t { color: white; }
+        .wkt-t { color: #ff8a80; } /* Light Red */
+        .bat-i { display:none; margin-right:4px; font-size:10px; }
+        .batting .bat-i { display:inline; }
 
     </style>
 </head>
 <body>
 
-    <div class="container" id="container" style="display:none;">
+    <div class="scoreboard-container" id="container" style="display:none;">
         
-        <div class="header-bar">
-            <div class="bat-side" id="teamBat">BAT</div>
-            
-            <div class="score-middle">
-                <span id="targetTxt" class="target-txt">TGT: 0</span>
-                <span class="main-score" id="score">0-0</span>
-                <span class="overs-small" id="overs">0.0</span>
+        <div class="main-stats">
+            <div class="team-line">
+                <span id="teamBat">RANGERS</span>
+                <span id="targetBox" class="target-tag">TGT: 10</span>
             </div>
-
-            <div class="bowl-side" id="teamBowl">BOWL</div>
+            <div class="score-line">
+                <span class="big-score" id="score">0-0</span>
+                <span class="overs" id="overs">(0.0)</span>
+            </div>
         </div>
 
-        <div class="player-list" id="list">
-            </div>
+        <div class="players-area">
+            <div class="player-grid" id="pGrid">
+                </div>
+        </div>
 
     </div>
 
     <script>
-        // --- KEYS ---
+        // --- YOUR KEYS (Pre-filled) ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // ------------
+        // ------------------------------
 
         async function fetchScore() {
             try {
@@ -135,22 +126,21 @@
 
                 document.getElementById('container').style.display = "flex";
 
-                // Update Texts
-                document.getElementById('teamBat').innerText = d.teamBat || "TEAM A";
-                document.getElementById('teamBowl').innerText = d.teamBowl || "TEAM B";
+                // Update Main Stats
+                document.getElementById('teamBat').innerText = d.teamBat || "TEAM";
                 document.getElementById('score').innerText = d.score || "0-0";
-                document.getElementById('overs').innerText = d.overs || "0.0";
+                document.getElementById('overs').innerText = `(${d.overs || "0.0"})`;
                 
-                // Target Logic
-                const tBox = document.getElementById('targetTxt');
+                // Target Display
+                const tBox = document.getElementById('targetBox');
                 if(d.target && d.target > 0) {
-                    tBox.style.display = "block";
+                    tBox.style.display = "inline-block";
                     tBox.innerText = "TARGET: " + d.target;
                 } else {
                     tBox.style.display = "none";
                 }
 
-                // Player Logic & Sorting
+                // Process Players
                 let players = [];
                 for(let i=1; i<=4; i++) {
                     players.push({
@@ -160,23 +150,26 @@
                         isBat: d[`p${i}Bat`]
                     });
                 }
+                // Sort by Points
                 players.sort((a,b) => (b.runs + b.wkts*15) - (a.runs + a.wkts*15));
 
-                // Render List
-                const list = document.getElementById('list');
-                list.innerHTML = "";
+                // Render Grid
+                const grid = document.getElementById('pGrid');
+                grid.innerHTML = "";
                 
                 players.forEach((p, idx) => {
                     const isMVP = (idx === 0 && (p.runs > 0 || p.wkts > 0));
                     const batClass = p.isBat ? "batting" : "";
                     const mvpClass = isMVP ? "mvp" : "";
                     
-                    list.innerHTML += `
-                    <div class="player-row ${mvpClass} ${batClass}">
-                        <div><span class="bat-icon">🏏</span>${p.name || "Player"}</div>
-                        <div class="p-right">
-                            <span class="run-txt">${p.runs}</span>
-                            <span class="wkt-txt">${p.wkts}W</span>
+                    grid.innerHTML += `
+                    <div class="p-item ${mvpClass} ${batClass}">
+                        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">
+                            <span class="bat-i">🏏</span>${p.name || "P"+(idx+1)}
+                        </div>
+                        <div class="p-stats">
+                            <span class="run-t">${p.runs}</span>
+                            <span class="wkt-t">${p.wkts}W</span>
                         </div>
                     </div>`;
                 });
