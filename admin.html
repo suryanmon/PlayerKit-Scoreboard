@@ -11,7 +11,9 @@
         input[type="text"], input[type="number"] { background: #2c2c2c; color: white; border: 1px solid #444; width: 100%; padding: 10px; border-radius: 6px; box-sizing: border-box; }
         input[type="color"] { border: none; width: 50px; height: 40px; cursor: pointer; background: transparent; }
         
-        label { font-size: 11px; font-weight: bold; color: #aaa; text-transform: uppercase; margin-bottom: 5px; display:block; }
+        /* Fixed Label Style */
+        label { font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px; display:block; }
+        
         .team-header { padding: 8px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
         /* Batting Toggle */
@@ -41,11 +43,21 @@
             </label>
         </div>
 
-        <label style="margin-top:10px;">Match Stats</label>
+        <div style="margin-top:15px;"></div>
+
         <div class="row">
-            <input type="text" id="score" placeholder="Score">
-            <input type="text" id="overs" placeholder="Overs">
-            <input type="number" id="target" placeholder="Target">
+            <div style="flex:1">
+                <label>Score</label>
+                <input type="text" id="score" placeholder="0-0">
+            </div>
+            <div style="flex:1">
+                <label>Overs</label>
+                <input type="text" id="overs" placeholder="0.0">
+            </div>
+            <div style="flex:1">
+                <label>Target</label>
+                <input type="number" id="target" placeholder="0">
+            </div>
         </div>
     </div>
 
@@ -56,14 +68,32 @@
         </div>
         <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
-            <input type="text" id="p1Name" placeholder="Player 1" style="flex:2">
-            <input type="number" id="p1Runs" placeholder="R" style="flex:1">
-            <input type="number" id="p1Wkts" placeholder="W" style="flex:1">
+            <div style="flex:2">
+                <label>Player 1 Name</label>
+                <input type="text" id="p1Name" placeholder="Name">
+            </div>
+            <div style="flex:1">
+                <label>Runs</label>
+                <input type="number" id="p1Runs" placeholder="0">
+            </div>
+            <div style="flex:1">
+                <label>Wkts</label>
+                <input type="number" id="p1Wkts" placeholder="0">
+            </div>
         </div>
         <div class="row">
-            <input type="text" id="p2Name" placeholder="Player 2" style="flex:2">
-            <input type="number" id="p2Runs" placeholder="R" style="flex:1">
-            <input type="number" id="p2Wkts" placeholder="W" style="flex:1">
+            <div style="flex:2">
+                <label>Player 2 Name</label>
+                <input type="text" id="p2Name" placeholder="Name">
+            </div>
+            <div style="flex:1">
+                <label>Runs</label>
+                <input type="number" id="p2Runs" placeholder="0">
+            </div>
+            <div style="flex:1">
+                <label>Wkts</label>
+                <input type="number" id="p2Wkts" placeholder="0">
+            </div>
         </div>
     </div>
 
@@ -74,14 +104,32 @@
         </div>
         <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
-            <input type="text" id="p3Name" placeholder="Player 3" style="flex:2">
-            <input type="number" id="p3Runs" placeholder="R" style="flex:1">
-            <input type="number" id="p3Wkts" placeholder="W" style="flex:1">
+            <div style="flex:2">
+                <label>Player 3 Name</label>
+                <input type="text" id="p3Name" placeholder="Name">
+            </div>
+            <div style="flex:1">
+                <label>Runs</label>
+                <input type="number" id="p3Runs" placeholder="0">
+            </div>
+            <div style="flex:1">
+                <label>Wkts</label>
+                <input type="number" id="p3Wkts" placeholder="0">
+            </div>
         </div>
         <div class="row">
-            <input type="text" id="p4Name" placeholder="Player 4" style="flex:2">
-            <input type="number" id="p4Runs" placeholder="R" style="flex:1">
-            <input type="number" id="p4Wkts" placeholder="W" style="flex:1">
+            <div style="flex:2">
+                <label>Player 4 Name</label>
+                <input type="text" id="p4Name" placeholder="Name">
+            </div>
+            <div style="flex:1">
+                <label>Runs</label>
+                <input type="number" id="p4Runs" placeholder="0">
+            </div>
+            <div style="flex:1">
+                <label>Wkts</label>
+                <input type="number" id="p4Wkts" placeholder="0">
+            </div>
         </div>
     </div>
 
