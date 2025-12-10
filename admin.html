@@ -1,76 +1,163 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cricket Controller</title>
+    <title>Cricket Admin Panel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
-        label { font-weight: bold; display: block; margin-top: 10px; }
-        input { width: 100%; padding: 12px; margin-bottom: 5px; font-size: 18px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;}
-        button { width: 100%; padding: 20px; background: #28a745; color: white; font-size: 24px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;}
-        button:active { background: #1e7e34; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; padding: 20px; max-width: 600px; margin: auto; }
+        h2 { text-align: center; color: #333; }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-title { font-size: 14px; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-top: 8px; }
+        input[type="text"], input[type="number"], input[type="color"] { 
+            width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box; 
+        }
+        
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        
+        button { width: 100%; padding: 15px; background: #007bff; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        #status { text-align: center; margin-top: 10px; font-weight: bold; height: 20px; }
+        .loading { color: #f39c12; }
+        .success { color: #27ae60; }
+        .error { color: #c0392b; }
     </style>
 </head>
 <body>
-    <h2>Update Scoreboard</h2>
-    
-    <label>Team Name (e.g. INDIA)</label>
-    <input type="text" id="team" placeholder="Team Name">
 
-    <div style="display:flex; gap:10px;">
-        <div style="flex:1;">
-            <label>Runs</label>
-            <input type="number" id="runs" placeholder="0">
+    <h2>Match Controller</h2>
+    <p id="status" class="loading">Connecting...</p>
+
+    <div class="card">
+        <div class="card-title">Theme Settings</div>
+        <label>Scoreboard Color</label>
+        <input type="color" id="themeColor" value="#0d1b54">
+    </div>
+
+    <div class="card">
+        <div class="card-title">Batting Team (Left Side)</div>
+        <div class="row">
+            <div class="col"><label>Team Name (e.g. AUS)</label><input type="text" id="batTeam"></div>
+            <div class="col"><label>Total Runs</label><input type="number" id="runs"></div>
+            <div class="col"><label>Wickets</label><input type="number" id="wickets"></div>
         </div>
-        <div style="flex:1;">
-            <label>Wickets</label>
-            <input type="number" id="wickets" placeholder="0">
+        <div class="row">
+            <div class="col"><label>Overs (e.g. 14.2)</label><input type="text" id="overs"></div>
+            <div class="col"><label>Powerplay?</label><input type="text" id="pp" placeholder="P"></div>
         </div>
     </div>
 
-    <div style="display:flex; gap:10px;">
-        <div style="flex:1;">
-            <label>Overs</label>
-            <input type="text" id="overs" placeholder="0.0">
+    <div class="card">
+        <div class="card-title">Batsmen Details</div>
+        <div class="row">
+            <div class="col" style="flex:2"><label>Striker Name</label><input type="text" id="bat1"></div>
+            <div class="col"><label>Runs</label><input type="number" id="bat1Runs"></div>
+            <div class="col"><label>Balls</label><input type="number" id="bat1Balls"></div>
         </div>
-        <div style="flex:1;">
-            <label>Target (Optional)</label>
-            <input type="number" id="target" placeholder="0">
+        <div class="row">
+            <div class="col" style="flex:2"><label>Non-Striker Name</label><input type="text" id="bat2"></div>
+            <div class="col"><label>Runs</label><input type="number" id="bat2Runs"></div>
+            <div class="col"><label>Balls</label><input type="number" id="bat2Balls"></div>
         </div>
     </div>
 
-    <button onclick="updateScore()">UPDATE STREAM</button>
-    <p id="status" style="text-align:center; margin-top:10px; color: #666;"></p>
+    <div class="card">
+        <div class="card-title">Match Status (Middle Box)</div>
+        <label>Status Text (e.g. TOSS WON BY INDIA or TARGET: 240)</label>
+        <input type="text" id="matchStatus">
+    </div>
+
+    <div class="card">
+        <div class="card-title">Bowling Team (Right Side)</div>
+        <div class="row">
+            <div class="col"><label>Versus Team (e.g. IND)</label><input type="text" id="bowlTeam"></div>
+        </div>
+        <label>Current Bowler Name</label>
+        <input type="text" id="bowler">
+        <div class="row">
+            <div class="col"><label>Bowler Figures (e.g. 1-24)</label><input type="text" id="bowlerFigs"></div>
+            <div class="col"><label>Bowler Overs</label><input type="text" id="bowlerOvers"></div>
+        </div>
+        <label>This Over (Comma separated, e.g. 0,4,1,W)</label>
+        <input type="text" id="thisOver" placeholder="0, 0, 4, 1lb, W">
+    </div>
+
+    <button onclick="updateScore()" id="updateBtn">UPDATE BOARD</button>
 
     <script>
-        // --- YOUR KEYS ARE SET BELOW ---
+        // --- KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // -------------------------------
+        // ------------
 
-        function updateScore() {
-            const data = {
-                team: document.getElementById('team').value,
-                runs: document.getElementById('runs').value,
-                wickets: document.getElementById('wickets').value,
-                overs: document.getElementById('overs').value,
-                target: document.getElementById('target').value
-            };
-            
-            document.getElementById('status').innerText = "Updating...";
+        const fields = ['themeColor', 'batTeam', 'runs', 'wickets', 'overs', 'pp', 'bat1', 'bat1Runs', 'bat1Balls', 'bat2', 'bat2Runs', 'bat2Balls', 'matchStatus', 'bowlTeam', 'bowler', 'bowlerFigs', 'bowlerOvers', 'thisOver'];
 
-            fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': API_KEY
-                },
-                body: JSON.stringify(data)
-            }).then(response => {
-                if(response.ok) document.getElementById('status').innerText = "✅ Updated!";
-                else document.getElementById('status').innerText = "❌ Error (Check Console)";
-            });
+        // 1. Fetch Data on Load (Fixes the "Empty" issue)
+        async function loadData() {
+            try {
+                document.getElementById('status').innerText = "Loading saved score...";
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                const json = await res.json();
+                const data = json.record;
+
+                if (data) {
+                    fields.forEach(id => {
+                        if (document.getElementById(id)) {
+                            document.getElementById(id).value = data[id] || "";
+                        }
+                    });
+                    document.getElementById('status').innerText = "Ready to score";
+                    document.getElementById('status').className = "success";
+                }
+            } catch (e) {
+                document.getElementById('status').innerText = "Error loading data";
+                document.getElementById('status').className = "error";
+            }
         }
+
+        // 2. Update Data
+        async function updateScore() {
+            const btn = document.getElementById('updateBtn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            status.innerText = "Updating...";
+            status.className = "loading";
+
+            let payload = {};
+            fields.forEach(id => {
+                payload[id] = document.getElementById(id).value;
+            });
+
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    status.innerText = "✅ Updated Successfully!";
+                    status.className = "success";
+                } else {
+                    throw new Error("API Error");
+                }
+            } catch (e) {
+                status.innerText = "❌ Update Failed";
+                status.className = "error";
+            }
+            btn.disabled = false;
+        }
+
+        // Initialize immediately
+        loadData();
     </script>
 </body>
 </html>
