@@ -6,50 +6,57 @@
 
         body { margin: 0; background: transparent; overflow: hidden; font-family: 'Exo 2', sans-serif; }
         
-        .scoreboard-container {
+        /* 1. Main Wrapper (Invisible, holds the two sides) */
+        .screen-wrapper {
             position: fixed;
             bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 98%;
-            max-width: 900px;
+            left: 20px;
+            right: 20px;
             height: 70px;
-            background: #0f2027; /* Dark Base */
-            border-radius: 8px;
             display: flex;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
-            color: white;
-            border-bottom: 2px solid #333;
+            justify-content: space-between; /* Pushes items to far edges */
+            align-items: flex-end;
+            pointer-events: none; /* Lets clicks pass through the middle gap */
         }
 
-        /* 1. MATCH SCORE (Left - Fixed Width) */
-        .main-stats {
-            flex: 0 0 190px;
+        /* Common Card Style */
+        .card-base {
+            background: #0f2027;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            color: white;
+            overflow: hidden;
+            pointer-events: auto;
+            height: 100%;
+            display: flex;
+            border-bottom: 3px solid #333;
+        }
+
+        /* --- LEFT SIDE: MATCH SCORE --- */
+        .score-card {
+            width: 220px; /* Fixed width for score */
             background: #19252b;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 0 15px;
+            padding: 0 20px;
+            position: relative;
             border-right: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            z-index: 10;
         }
-        
-        .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 17px; color: #fff; margin-bottom: 2px; text-transform: uppercase;}
+
+        .team-line { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 2px; text-transform: uppercase;}
         .score-line { display: flex; align-items: baseline; gap: 8px; }
-        .big-score { font-size: 30px; font-weight: 800; color: #ffeb3b; line-height: 1; }
-        .overs { font-size: 15px; color: #aaa; font-weight: 400; }
-        .target-tag { font-size: 11px; background: #d32f2f; color:white; padding: 2px 5px; border-radius: 3px; display: none; font-weight: bold;}
+        .big-score { font-size: 32px; font-weight: 800; color: #ffeb3b; line-height: 1; }
+        .overs { font-size: 16px; color: #aaa; font-weight: 400; }
+        .target-tag { font-size: 11px; background: #d32f2f; color:white; padding: 2px 6px; border-radius: 3px; display: none; font-weight: bold; position: absolute; right: 20px; top: 18px;}
 
-        /* 2. PLAYERS WRAPPER */
-        .players-wrapper {
-            flex: 1;
+        /* --- RIGHT SIDE: LEADERBOARD --- */
+        .leaderboard-card {
+            width: 600px; /* Width for players */
             display: flex;
-            position: relative;
         }
 
-        /* DYNAMIC TEAM SECTIONS */
+        /* Team Sections */
         .team-section {
             flex: 1;
             display: flex;
@@ -60,9 +67,7 @@
             transition: all 0.5s ease;
         }
 
-        /* Glow effects generated via JS */
-        
-        /* Player Row Style */
+        /* Player Rows */
         .p-row {
             display: flex;
             justify-content: space-between;
@@ -76,7 +81,7 @@
         }
         .p-row:last-child { border-bottom: none; }
         
-        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+        .p-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
         .p-stats { display: flex; gap: 10px; font-weight: 700; }
         .run-val { color: #fff; width: 30px; text-align: right; }
         .wkt-val { color: #ff8a80; width: 30px; text-align: right; }
@@ -89,9 +94,9 @@
 </head>
 <body>
 
-    <div class="scoreboard-container" id="container" style="display:none;">
+    <div class="screen-wrapper" id="container" style="display:none;">
         
-        <div class="main-stats">
+        <div class="card-base score-card">
             <div class="team-line">
                 <span id="mainTeamName">MATCH</span>
                 <span id="targetBox" class="target-tag">TGT: 10</span>
@@ -102,7 +107,7 @@
             </div>
         </div>
 
-        <div class="players-wrapper">
+        <div class="card-base leaderboard-card">
             
             <div class="team-section" id="team1Section">
                 <div class="p-row">
@@ -146,7 +151,7 @@
         // --- KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // -----------------
+        // ------------
 
         async function fetchScore() {
             try {
@@ -160,20 +165,20 @@
                 const c1 = d.color1 || "#0277bd";
                 const c2 = d.color2 || "#c62828";
 
-                // Team 1 Styles (Gradient + Left Border + Glow)
+                // Team 1 Styles
                 const t1 = document.getElementById('team1Section');
                 t1.style.background = `linear-gradient(90deg, ${hexToRgba(c1, 0.4)} 0%, transparent 100%)`;
                 t1.style.borderLeft = `5px solid ${c1}`;
-                t1.style.boxShadow = `inset 10px 0 20px -10px ${c1}`; // Inner Glow
+                t1.style.boxShadow = `inset 10px 0 20px -10px ${c1}`;
 
-                // Team 2 Styles (Gradient + Right Border + Glow)
+                // Team 2 Styles
                 const t2 = document.getElementById('team2Section');
                 t2.style.background = `linear-gradient(90deg, transparent 0%, ${hexToRgba(c2, 0.4)} 100%)`;
                 t2.style.borderRight = `5px solid ${c2}`;
                 t2.style.borderLeft = `1px solid rgba(255,255,255,0.1)`;
-                t2.style.boxShadow = `inset -10px 0 20px -10px ${c2}`; // Inner Glow
+                t2.style.boxShadow = `inset -10px 0 20px -10px ${c2}`;
 
-                // 2. MAIN HEADER LOGIC (Who is batting?)
+                // 2. MAIN HEADER LOGIC
                 const batSide = d.battingSide || 'team1';
                 const mainName = batSide === 'team1' ? (d.team1Name || "TEAM 1") : (d.team2Name || "TEAM 2");
                 setText('mainTeamName', mainName);
@@ -203,7 +208,6 @@
             const isBat = d[`p${num}Bat`];
             const isBowl = d[`p${num}Bowl`];
 
-            // Build Name HTML with Icons
             let html = rawName;
             if(isBat) html = `<span class="icon-bat">🏏</span> ` + html;
             if(isBowl) html += ` <span class="icon-ball">🔴</span>`;
@@ -219,7 +223,6 @@
             if(el) el.innerText = txt;
         }
 
-        // Helper to make transparent colors for gradients
         function hexToRgba(hex, alpha) {
             let r = parseInt(hex.slice(1, 3), 16),
                 g = parseInt(hex.slice(3, 5), 16),
