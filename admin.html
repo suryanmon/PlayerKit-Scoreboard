@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2v2 Compact Admin</title>
+    <title>2v2 Controller</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; background: #eef2f5; padding: 15px; max-width: 500px; margin: auto; }
@@ -14,18 +14,19 @@
     </style>
 </head>
 <body>
-    <h3 style="text-align:center; margin:0 0 15px 0;">Compact Controller</h3>
+    <h3 style="text-align:center; margin:0 0 15px 0;">Match Controller</h3>
 
     <div class="card">
-        <label>TEAMS & SCORE</label>
+        <label>TEAMS</label>
         <div class="row">
             <input type="text" id="teamBat" placeholder="Batting Team (Left)">
             <input type="text" id="teamBowl" placeholder="Bowling Team (Right)">
         </div>
+        <label>SCORE & TARGET</label>
         <div class="row">
             <input type="text" id="score" placeholder="Score (e.g. 45-1)">
             <input type="text" id="overs" placeholder="Overs (0.0)">
-            <input type="number" id="target" placeholder="Target (Optional)">
+            <input type="number" id="target" placeholder="Target">
         </div>
     </div>
 
@@ -43,7 +44,7 @@
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
         // ------------
 
-        // Generate Inputs for 4 players automatically to save space in code
+        // Auto-generate player inputs
         let html = '';
         for(let i=1; i<=4; i++) {
             html += `
