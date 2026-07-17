@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compréhension écrite — Entraînement TCF Canada</title>
+<style>
+  :root{
+    --paper:#faf9f5;
+    --ink:#1c2433;
+    --muted:#667085;
+    --line:#e2e5ea;
+    --card-bg:#eef3fa;
+    --card-border:#c9d7ec;
+    --accent:#28508c;
+    --accent-deep:#16305c;
+    --accent-soft:#dde8f7;
+    --correct:#1e8a5f;
+    --correct-bg:#e5f6ec;
+    --incorrect:#c23b3b;
+    --incorrect-bg:#fbeaea;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 1.1rem 3rem;}
+
+  header.top{padding:2.4rem 0 1.2rem;}
+  .eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;}
+  h1{font-family:Georgia,serif;font-size:1.9rem;line-height:1.2;margin:.35rem 0 .5rem;color:var(--accent-deep);}
+  .subtitle{color:var(--muted);font-size:.92rem;line-height:1.5;margin:0 0 1.1rem;}
+  .subtitle strong{color:var(--ink);}
+
+  .level-strip{display:flex;height:7px;border-radius:5px;overflow:hidden;border:1px solid var(--line);}
+  .level-strip span{display:block;}
+  .lvA1{flex-grow:4;background:#bcd2ef;}
+  .lvA2{flex-grow:6;background:#9dbde6;}
+  .lvB1{flex-grow:9;background:#6f9cd6;}
+  .lvB2{flex-grow:10;background:#4a7dc4;}
+  .lvC1{flex-grow:6;background:#2f5aa8;}
+  .lvC2{flex-grow:4;background:#1e3f80;}
+  .level-legend{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:.35rem;font-variant-numeric:tabular-nums;}
+
+  .progress-shell{
+    position:sticky;top:0;z-index:20;
+    background:rgba(250,249,245,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    padding:.65rem 1.1rem;
+    margin:0 -1.1rem 1.6rem;
+  }
+  .progress-row{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:.8rem;}
+  .progress-track{flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:var(--accent);transition:width .2s ease;}
+  .progress-label{font-size:.78rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+  .qcard{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:1.3rem 1.4rem;margin-bottom:1.2rem;
+  }
+  .qcard.unanswered{border-color:var(--incorrect);}
+  .qhead{display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;}
+  .qnum{
+    width:2rem;height:2rem;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.83rem;flex-shrink:0;
+  }
+  .qtag{font-size:.68rem;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;}
+  .qtag.flag{color:var(--incorrect);font-weight:700;}
+
+  .passage{
+    background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);
+    padding:1rem 1.15rem;font-size:1rem;line-height:1.58;margin-bottom:1.05rem;
+  }
+  .qtext{font-family:Georgia,serif;font-weight:700;font-size:1.05rem;margin:0 0 .9rem;}
+
+  .options{display:flex;flex-direction:column;gap:.55rem;}
+  .opt{
+    display:flex;align-items:flex-start;gap:.75rem;padding:.65rem .95rem;
+    border:1px solid var(--line);border-radius:8px;cursor:pointer;
+    transition:background .15s,border-color .15s;
+  }
+  .opt:hover{background:#f5f7fa;}
+  .opt input{accent-color:var(--accent);width:1rem;height:1rem;flex-shrink:0;margin-top:.2rem;}
+  .optletter{font-weight:700;color:var(--accent);width:1.1rem;flex-shrink:0;}
+  .opttext{line-height:1.45;}
+  .opt.selected{border-color:var(--accent);background:var(--accent-soft);}
+  .opt.is-correct{border-color:var(--correct);background:var(--correct-bg);}
+  .opt.is-correct .optletter{color:var(--correct);}
+  .opt.is-incorrect{border-color:var(--incorrect);background:var(--incorrect-bg);}
+  .opt.is-incorrect .optletter{color:var(--incorrect);}
+
+  .results{display:none;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:1.5rem 1.6rem;margin-bottom:1.8rem;}
+  .results.show{display:block;}
+  .results-top{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:1.1rem;}
+  .score-big{font-family:Georgia,serif;font-size:2.9rem;font-weight:700;color:var(--accent-deep);line-height:1;}
+  .score-of{color:var(--muted);font-size:1rem;}
+  .results h2{margin:0;font-family:Georgia,serif;font-size:1.15rem;}
+  .results-note{font-size:.78rem;color:var(--muted);margin:0 0 1.1rem;line-height:1.5;}
+  .lvrow{display:flex;align-items:center;gap:.7rem;margin-bottom:.5rem;font-size:.85rem;}
+  .lvname{width:2rem;font-weight:700;color:var(--accent-deep);flex-shrink:0;}
+  .lvbar{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden;}
+  .lvfill{height:100%;background:var(--accent);}
+  .lvfrac{width:2.6rem;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
+
+  .actionbar{
+    position:sticky;bottom:0;z-index:20;
+    background:rgba(250,249,245,.94);backdrop-filter:blur(6px);
+    border-top:1px solid var(--line);
+    margin:0 -1.1rem;padding:.85rem 1.1rem;
+    display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  }
+  .actionbar span{font-size:.85rem;color:var(--muted);}
+  button{font-family:inherit;font-size:.92rem;}
+  button.primary{background:var(--accent);color:#fff;border:none;padding:.65rem 1.35rem;border-radius:8px;font-weight:700;cursor:pointer;}
+  button.primary:hover{background:var(--accent-deep);}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:.6rem 1.2rem;border-radius:8px;cursor:pointer;}
+  button.ghost:hover{background:#f0f2f5;}
+
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  @media(max-width:640px){
+    .qcard{padding:1rem;}
+    h1{font-size:1.55rem;}
+    .score-big{font-size:2.3rem;}
+    .progress-shell{padding:.6rem .9rem;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important;scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">TCF Canada · Épreuve blanche</div>
+    <h1>Compréhension écrite</h1>
+    <p class="subtitle">39 questions, difficulté progressive de <strong>A1</strong> à <strong>C2</strong>. Une seule bonne réponse par question, aucune pénalité en cas d'erreur. Lisez le texte puis répondez. Les corrections s'affichent uniquement après avoir soumis l'examen.</p>
+    <div class="level-strip">
+      <span class="lvA1"></span><span class="lvA2"></span><span class="lvB1"></span><span class="lvB2"></span><span class="lvC1"></span><span class="lvC2"></span>
+    </div>
+    <div class="level-legend"><span>A1</span><span>A2</span><span>B1</span><span>B2</span><span>C1</span><span>C2</span></div>
+  </header>
+
+  <div class="progress-shell">
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label"><span id="answeredCount">0</span>/39 répondues</div>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="results-top">
+      <div class="score-big"><span id="scoreValue">0</span></div>
+      <div class="score-of">/ 39 bonnes réponses</div>
+    </div>
+    <h2>Repère par niveau</h2>
+    <p class="results-note">Ce repère est indicatif : il reflète simplement la répartition des questions de cet entraînement par niveau du CECRL, pas une conversion officielle en score TCF.</p>
+    <div id="levelBreakdown"></div>
+  </div>
+
+  <form id="examForm">
+    <div id="questions"></div>
+  </form>
+
+  <div class="actionbar" id="actionbar">
+    <span>Répondez puis soumettez pour voir votre score.</span>
+    <button type="button" class="primary" id="submitBtn">Soumettre</button>
+  </div>
+
+</div>
+
+<script>
+const DATA = [
+  // ---------- A1 ----------
+  {level:"A1",topic:"Voyage",passage:`Salut Marie ! Je suis à la plage avec ma famille. Il fait très beau. Nous rentrons dimanche soir. Bisous, Paul`,question:`Où est Paul ?`,options:[`À la montagne`,`À l'école`,`À la plage`,`Au bureau`],correct:2},
+  {level:"A1",topic:"Santé",passage:`Bonjour, j'ai rendez-vous chez le docteur à 15h00 aujourd'hui. Je ne peux pas venir au cours de sport. À demain ! Léa`,question:`Pourquoi Léa n'est pas au cours de sport ?`,options:[`Elle a un rendez-vous chez le médecin`,`Elle est malade`,`Elle est en vacances`,`Elle travaille`],correct:0},
+  {level:"A1",topic:"Éducation",passage:`Attention élèves ! Le cours de mathématiques de 14h00 est annulé. Rendez-vous directement en salle 12 pour le cours d'anglais. Merci.`,question:`Que doivent faire les élèves ?`,options:[`Aller au cours de mathématiques`,`Rentrer à la maison`,`Attendre le professeur`,`Aller en salle 12`],correct:3},
+  {level:"A1",topic:"Environnement",passage:`Ici, on trie les déchets ! Papier et carton dans la poubelle bleue. Verre dans la poubelle verte. Merci de votre geste pour la planète.`,question:`Où faut-il mettre le papier ?`,options:[`Dans la poubelle verte`,`Dans la poubelle bleue`,`Dans la poubelle jaune`,`Dans la poubelle grise`],correct:1},
+
+  // ---------- A2 ----------
+  {level:"A2",topic:"Voyage",passage:`Chère Sophie, cet été, nous partons en Bretagne pour deux semaines. Nous avons loué une petite maison près de la mer. Tu peux venir nous rejoindre si tu veux, il y a de la place pour toi ! Réponds-moi vite. Camille`,question:`Qu'est-ce que Camille propose à Sophie ?`,options:[`De louer une maison ensemble`,`De venir travailler avec elle`,`De la rejoindre en vacances`,`De partir à l'étranger`],correct:2},
+  {level:"A2",topic:"Santé",passage:`Nouveau cours de yoga ! Tous les mardis et jeudis de 18h à 19h, salle B. Ouvert à tous les niveaux, débutants bienvenus. Apportez votre tapis. Premier cours gratuit !`,question:`Que faut-il apporter pour ce cours ?`,options:[`Un tapis`,`Des chaussures de sport`,`Une bouteille d'eau`,`Une serviette`],correct:0},
+  {level:"A2",topic:"Technologie",passage:`Découvrez FoodNow, la nouvelle application pour commander votre repas préféré en quelques clics ! Livraison en 30 minutes dans toute la ville. Téléchargez-la gratuitement et recevez 5€ offerts sur votre première commande.`,question:`Qu'offre l'application aux nouveaux utilisateurs ?`,options:[`Une livraison gratuite à vie`,`Un repas gratuit`,`Un abonnement premium`,`Une réduction de 5€`],correct:3},
+  {level:"A2",topic:"Éducation",passage:`L'école organise un atelier d'écriture créative le samedi 14 mars, de 10h à 12h, dans la bibliothèque. Places limitées à 15 élèves. Inscrivez-vous auprès de Mme Dubois avant vendredi.`,question:`Comment peut-on s'inscrire à l'atelier ?`,options:[`En envoyant un email`,`En s'adressant à Mme Dubois`,`En appelant l'école`,`En allant directement à la bibliothèque le jour même`],correct:1},
+  {level:"A2",topic:"Environnement",passage:`Grand nettoyage du parc municipal ! Rejoignez-nous samedi matin à 9h pour ramasser les déchets ensemble. Gants et sacs seront fournis sur place. Une collation sera offerte à tous les participants.`,question:`Que reçoivent les participants après le nettoyage ?`,options:[`Des gants`,`Un sac`,`Une collation`,`Un cadeau`],correct:2},
+  {level:"A2",topic:"Politique",passage:`Les élections municipales auront lieu dimanche prochain. N'oubliez pas votre carte d'électeur et une pièce d'identité. Le bureau de vote de votre quartier est ouvert de 8h à 18h.`,question:`Qu'est-ce qu'il faut apporter pour voter ?`,options:[`La carte d'électeur et une pièce d'identité`,`Seulement la carte d'électeur`,`Seulement une pièce d'identité`,`Rien de spécial`],correct:0},
+
+  // ---------- B1 ----------
+  {level:"B1",topic:"Santé",passage:`De plus en plus de Français se plaignent de mal dormir. Selon une récente enquête, près d'un adulte sur trois souffre de troubles du sommeil, souvent liés au stress et à l'utilisation excessive des écrans avant de se coucher. Les spécialistes recommandent d'éteindre les appareils électroniques au moins une heure avant le coucher et de garder des horaires de sommeil réguliers, même le week-end.`,question:`Selon l'enquête, quelle est une cause fréquente des troubles du sommeil ?`,options:[`Le manque d'exercice physique`,`Une alimentation trop riche`,`Le bruit dans les grandes villes`,`L'utilisation des écrans le soir`],correct:3},
+  {level:"B1",topic:"Environnement",passage:`La ville de Nantes a lancé un programme de jardins partagés dans plusieurs quartiers. Les habitants peuvent cultiver des légumes et des fleurs sur des parcelles mises à disposition gratuitement par la mairie. Cette initiative, qui rencontre un grand succès, permet aussi de créer du lien social entre voisins qui ne se connaissaient pas auparavant.`,question:`Quel est un des effets positifs de cette initiative, selon le texte ?`,options:[`Elle réduit les impôts locaux`,`Elle crée du lien social entre habitants`,`Elle diminue la pollution de l'air`,`Elle augmente le prix des légumes`],correct:1},
+  {level:"B1",topic:"Voyage",passage:`Le tourisme rural connaît un essor important en France depuis quelques années. Fatigués du rythme des grandes villes, de plus en plus de voyageurs choisissent de passer leurs vacances à la campagne, dans des gîtes ou des fermes. Ils recherchent avant tout le calme, le contact avec la nature et une déconnexion totale des réseaux sociaux.`,question:`Que recherchent principalement les touristes qui choisissent la campagne ?`,options:[`Des activités sportives extrêmes`,`Des prix très bas`,`Le calme et la nature`,`Une vie nocturne animée`],correct:2},
+  {level:"B1",topic:"Éducation",passage:`Plusieurs écoles primaires expérimentent une nouvelle méthode d'apprentissage basée sur les projets plutôt que sur les cours magistraux classiques. Les élèves travaillent en petits groupes sur des sujets concrets, comme la construction d'une cabane ou l'organisation d'un potager scolaire. Les premiers résultats montrent une meilleure motivation des enfants, même si certains parents restent sceptiques sur l'efficacité de cette approche.`,question:`Comment réagissent certains parents face à cette nouvelle méthode ?`,options:[`Ils restent sceptiques`,`Ils sont enthousiastes`,`Ils la trouvent inefficace`,`Ils demandent son interdiction`],correct:0},
+  {level:"B1",topic:"Technologie",passage:`Une étude récente montre que les adolescents français passent en moyenne plus de quatre heures par jour sur leur smartphone. Si les réseaux sociaux et les jeux vidéo occupent une grande partie de ce temps, l'étude souligne aussi que ces appareils sont de plus en plus utilisés pour les devoirs scolaires, ce qui complique la tâche des parents qui souhaitent limiter le temps d'écran.`,question:`Pourquoi est-il difficile pour les parents de limiter le temps d'écran ?`,options:[`Les adolescents refusent d'obéir`,`Les écoles obligent à utiliser un smartphone`,`Les parents n'ont pas le temps de surveiller`,`Le smartphone sert aussi pour les devoirs`],correct:3},
+  {level:"B1",topic:"Politique",passage:`Le conseil municipal a voté la semaine dernière la piétonnisation du centre-ville, une mesure qui divise les habitants. Les commerçants craignent une baisse de leur clientèle, tandis que les défenseurs du projet mettent en avant une meilleure qualité de l'air et un cadre de vie plus agréable. La mairie a annoncé une période d'essai de six mois avant une décision définitive.`,question:`Pourquoi certains commerçants s'inquiètent-ils de cette mesure ?`,options:[`Ils devront payer plus de taxes`,`Ils craignent de perdre des clients`,`Ils devront fermer leur magasin`,`Ils n'ont pas été consultés`],correct:1},
+  {level:"B1",topic:"Santé",passage:`Le régime méditerranéen continue de séduire de plus en plus de Français soucieux de leur santé. Basé sur les fruits, les légumes, les poissons et l'huile d'olive, ce mode d'alimentation est reconnu par de nombreux nutritionnistes pour ses effets bénéfiques sur le cœur. Toutefois, certains experts rappellent qu'aucun régime, aussi équilibré soit-il, ne remplace une activité physique régulière.`,question:`Que rappellent certains experts à propos de ce régime ?`,options:[`Il est trop cher pour la plupart des gens`,`Il n'a aucun effet sur la santé`,`Il ne remplace pas l'activité physique`,`Il est difficile à suivre au quotidien`],correct:2},
+  {level:"B1",topic:"Environnement",passage:`Depuis la mise en place du nouveau système de tri sélectif il y a deux ans, la quantité de déchets recyclés dans la région a augmenté de trente pour cent. La mairie attribue ce succès aux campagnes de sensibilisation menées dans les écoles ainsi qu'à la distribution de bacs de tri gratuits pour chaque foyer.`,question:`À quoi la mairie attribue-t-elle l'augmentation du recyclage ?`,options:[`Aux campagnes de sensibilisation et aux bacs gratuits`,`À une nouvelle loi nationale`,`À une taxe sur les déchets non triés`,`À l'ouverture d'un nouveau centre de tri`],correct:0},
+  {level:"B1",topic:"Technologie",passage:`Contrairement aux idées reçues, ce ne sont plus seulement les jeunes qui dominent les réseaux sociaux. Selon une étude, la tranche d'âge qui progresse le plus rapidement sur ces plateformes est celle des plus de 50 ans, en particulier sur Facebook, qu'ils utilisent surtout pour rester en contact avec leur famille et suivre l'actualité locale.`,question:`Selon l'étude, quelle tranche d'âge progresse le plus sur les réseaux sociaux ?`,options:[`Les moins de 18 ans`,`Les 18-30 ans`,`Les retraités uniquement`,`Les plus de 50 ans`],correct:3},
+
+  // ---------- B2 ----------
+  {level:"B2",topic:"Politique",passage:`La réforme des retraites continue d'alimenter un débat houleux au sein de la classe politique. Ses partisans avancent qu'elle est indispensable pour garantir la pérennité du système face au vieillissement de la population, tandis que ses détracteurs dénoncent une mesure injuste qui pénaliserait avant tout les travailleurs ayant commencé leur carrière tôt et exerçant des métiers physiquement pénibles. Entre nécessité budgétaire et justice sociale, le gouvernement peine à trouver un compromis qui satisfasse l'ensemble des parties prenantes.`,question:`Quel est le principal argument des opposants à la réforme ?`,options:[`Elle coûte trop cher à l'État`,`Elle pénalise injustement certains travailleurs`,`Elle ne résout pas le problème du vieillissement`,`Elle n'a pas été assez débattue au Parlement`],correct:1},
+  {level:"B2",topic:"Technologie",passage:`L'intelligence artificielle suscite autant d'espoirs que de craintes dans le monde du travail. Si certains y voient un formidable outil capable d'automatiser les tâches répétitives et de libérer du temps pour des activités plus créatives, d'autres redoutent une vague de suppressions de postes dans des secteurs entiers, notamment ceux liés à la saisie de données ou au service client. Les économistes s'accordent néanmoins sur un point : la formation continue sera déterminante pour permettre aux salariés de s'adapter à ces bouleversements.`,question:`Sur quel point les économistes semblent-ils d'accord ?`,options:[`L'IA va créer plus d'emplois qu'elle n'en détruit`,`L'IA doit être interdite dans certains secteurs`,`La formation continue sera essentielle pour l'adaptation des salariés`,`Les suppressions de postes seront limitées au service client`],correct:2},
+  {level:"B2",topic:"Environnement",passage:`Alors que la transition écologique s'impose comme une urgence, les moyens d'y parvenir font l'objet de vives controverses. Les partisans d'une taxe carbone plus élevée estiment qu'elle inciterait les entreprises à réduire leurs émissions plus rapidement, tandis que ses opposants craignent qu'elle ne pèse avant tout sur les ménages les plus modestes, déjà fragilisés par la hausse du coût de la vie. Certains experts plaident pour des mesures ciblées, comme des aides à la rénovation énergétique, plutôt qu'une taxation générale jugée trop punitive.`,question:`Que craignent les opposants à une taxe carbone plus élevée ?`,options:[`Qu'elle pénalise surtout les ménages modestes`,`Qu'elle ne réduise pas assez les émissions`,`Qu'elle soit rejetée par les entreprises`,`Qu'elle ralentisse la transition écologique`],correct:0},
+  {level:"B2",topic:"Santé",passage:`Le système de santé publique traverse une période de tensions marquée par la pénurie de personnel soignant, en particulier dans les zones rurales. Si les pouvoirs publics multiplient les incitations financières pour attirer de nouveaux médecins dans ces territoires délaissés, les professionnels concernés pointent surtout des conditions de travail dégradées et un manque criant de reconnaissance comme les véritables causes de cette désertion. Sans une réforme structurelle plus profonde, les mesures actuelles risquent de rester insuffisantes.`,question:`Selon les professionnels de santé, quelle est la véritable cause de la pénurie de médecins ?`,options:[`Le manque d'incitations financières`,`Le nombre insuffisant d'étudiants en médecine`,`La fermeture des hôpitaux ruraux`,`Les mauvaises conditions de travail et le manque de reconnaissance`],correct:3},
+  {level:"B2",topic:"Éducation",passage:`La sélection à l'entrée de l'université reste un sujet clivant dans le débat éducatif français. Ses défenseurs soutiennent qu'elle permettrait de réduire le taux d'échec en première année, particulièrement élevé dans certaines filières, en orientant mieux les étudiants selon leurs aptitudes réelles. Ses détracteurs y voient au contraire une remise en cause du principe d'égalité d'accès à l'enseignement supérieur, craignant qu'elle ne renforce les inégalités déjà existantes entre les élèves issus de milieux favorisés et les autres.`,question:`Quel est l'argument principal des défenseurs de la sélection à l'université ?`,options:[`Elle augmenterait le nombre d'étudiants`,`Elle réduirait le taux d'échec en première année`,`Elle rendrait les diplômes plus prestigieux`,`Elle diminuerait les frais d'inscription`],correct:1},
+  {level:"B2",topic:"Voyage",passage:`Le surtourisme dans certaines destinations emblématiques, comme Venise ou Barcelone, pousse de nombreuses municipalités à repenser leur politique d'accueil des visiteurs. Taxes de séjour renforcées, quotas de visiteurs journaliers, restrictions sur les locations de courte durée : les mesures se multiplient pour tenter de préserver la qualité de vie des habitants sans pour autant sacrifier l'économie locale, largement dépendante des revenus touristiques. L'équilibre reste toutefois difficile à trouver.`,question:`Pourquoi les municipalités hésitent-elles à limiter fortement le tourisme ?`,options:[`Les touristes protestent contre ces mesures`,`Les lois nationales l'interdisent`,`L'économie locale dépend des revenus du tourisme`,`Les habitants sont favorables au tourisme de masse`],correct:2},
+  {level:"B2",topic:"Politique",passage:`L'abstention record enregistrée lors des dernières élections législatives interroge les observateurs politiques. Si certains y voient l'expression d'un désintérêt croissant pour la vie démocratique, notamment chez les jeunes générations, d'autres analystes préfèrent parler d'un vote de défiance envers une classe politique jugée déconnectée des préoccupations quotidiennes des citoyens. Ce phénomène, loin d'être propre à la France, touche la plupart des démocraties occidentales et pousse certains à réclamer une réforme du mode de scrutin.`,question:`Comment certains analystes interprètent-ils l'abstention record, selon le texte ?`,options:[`Comme un vote de défiance envers les responsables politiques`,`Comme un désintérêt total pour la politique`,`Comme une conséquence directe du mode de scrutin actuel`,`Comme un phénomène propre à la France uniquement`],correct:0},
+  {level:"B2",topic:"Technologie",passage:`La collecte massive de données personnelles par les grandes plateformes numériques alimente un débat croissant sur la protection de la vie privée. Les défenseurs de la régulation estiment que les utilisateurs doivent reprendre le contrôle sur leurs informations, souvent exploitées à des fins commerciales sans réel consentement éclairé. À l'inverse, certains acteurs du secteur avertissent qu'un encadrement trop strict pourrait freiner l'innovation et désavantager les entreprises européennes face à la concurrence internationale, moins soumise à de telles contraintes.`,question:`Quel risque évoquent certains acteurs du secteur numérique face à une régulation stricte ?`,options:[`Une hausse du prix des services numériques`,`Une baisse de la qualité des données collectées`,`Une augmentation du piratage informatique`,`Un frein à l'innovation et un désavantage concurrentiel`],correct:3},
+  {level:"B2",topic:"Santé",passage:`Longtemps considérée comme un sujet tabou, la santé mentale gagne progressivement en visibilité dans le débat public, notamment depuis les campagnes de sensibilisation lancées après la pandémie. Si cette libération de la parole est saluée par les professionnels, ces derniers alertent néanmoins sur le décalage persistant entre la demande croissante de soins psychologiques et l'offre disponible, très insuffisante dans de nombreuses régions, ce qui allonge considérablement les délais d'attente pour obtenir un rendez-vous.`,question:`Sur quoi les professionnels de santé mentale alertent-ils ?`,options:[`Le manque d'intérêt du public pour ce sujet`,`Le décalage entre la demande de soins et l'offre disponible`,`L'inefficacité des campagnes de sensibilisation`,`Le coût trop élevé des consultations`],correct:1},
+  {level:"B2",topic:"Environnement",passage:`La transition vers les énergies renouvelables progresse en France, mais à un rythme jugé insuffisant par de nombreux experts au regard des objectifs climatiques fixés. Si l'éolien et le solaire se développent rapidement, leur intermittence pose la question du stockage de l'énergie et de la stabilité du réseau électrique. Les partisans du nucléaire y voient un argument supplémentaire en faveur du maintien de cette filière, tandis que les défenseurs du tout-renouvelable misent sur les progrès rapides des technologies de batteries.`,question:`Quel problème pose l'intermittence des énergies éolienne et solaire ?`,options:[`Elle rend leur installation trop coûteuse`,`Elle empêche leur utilisation en hiver`,`Elle pose la question du stockage et de la stabilité du réseau`,`Elle nécessite l'importation d'électricité étrangère`],correct:2},
+
+  // ---------- C1 ----------
+  {level:"C1",topic:"Éducation",passage:`On ne saurait réduire la crise actuelle de l'école à une simple question de moyens budgétaires, aussi réels soient les besoins en la matière. C'est bien davantage la finalité même de l'enseignement qui mérite d'être interrogée. Faut-il continuer de privilégier l'accumulation de savoirs disciplinaires cloisonnés, au risque de former des esprits juxtaposant des connaissances sans les relier entre elles, ou convient-il de repenser en profondeur les programmes autour de compétences transversales, seules à même de préparer les élèves aux défis d'un monde en mutation rapide ? Cette dernière hypothèse, séduisante sur le papier, se heurte néanmoins à la difficulté d'évaluer objectivement des compétences par nature plus diffuses que des connaissances factuelles.`,question:`Quelle difficulté l'auteur associe-t-il à l'approche par compétences transversales ?`,options:[`La difficulté d'évaluer objectivement ce type de compétences`,`Le manque de moyens budgétaires pour la mettre en œuvre`,`Le refus des enseignants de changer leurs méthodes`,`L'absence de demande de la part des élèves`],correct:0},
+  {level:"C1",topic:"Politique",passage:`La défiance grandissante envers les institutions représentatives ne saurait être uniquement imputée à une supposée déconnexion des élites politiques, explication commode mais insuffisante pour rendre compte d'un phénomène aux racines plus profondes. Elle traduit également une transformation du rapport des citoyens à l'autorité elle-même, désormais moins disposés à déléguer durablement leur pouvoir de décision et de plus en plus tentés par des formes de participation directe, ponctuelle et revendicative. Loin d'être un simple accident de parcours démocratique, cette évolution appelle une refonte des mécanismes de représentation plutôt qu'un simple ravalement de façade.`,question:`Selon l'auteur, que traduit également la défiance envers les institutions, au-delà de la déconnexion des élites ?`,options:[`Une baisse générale de l'intérêt pour la politique`,`Un rejet total du système démocratique`,`Une préférence pour les régimes autoritaires`,`Une transformation du rapport des citoyens à l'autorité`],correct:3},
+  {level:"C1",topic:"Technologie",passage:`Le discours ambiant sur l'intelligence artificielle oscille trop souvent entre un techno-optimisme béat et un catastrophisme tout aussi stérile, l'un comme l'autre dispensant paradoxalement de la tâche autrement plus ardue de définir un cadre éthique rigoureux et applicable. Car la question n'est pas tant de savoir si ces technologies bouleverseront nos sociétés, ce dont on peut désormais difficilement douter, mais bien de déterminer collectivement quelles décisions nous entendons continuer de réserver au jugement humain, et selon quels critères. À défaut, ce sont les logiques industrielles, guidées par d'autres impératifs que l'intérêt général, qui fixeront de facto ces limites à notre place.`,question:`Que reproche l'auteur aux discours technophile et catastrophiste sur l'IA ?`,options:[`Ils exagèrent tous deux les capacités réelles de l'IA`,`Ils évitent la question essentielle de définir un cadre éthique`,`Ils ignorent les bénéfices économiques de l'IA`,`Ils sont tous deux favorables à une régulation stricte`],correct:1},
+  {level:"C1",topic:"Environnement",passage:`L'idée selon laquelle la croissance économique pourrait indéfiniment se dissocier de son empreinte environnementale, souvent désignée sous le terme de découplage absolu, relève davantage aujourd'hui de l'article de foi que du constat empirique solidement établi. Les rares cas cités en exemple concernent généralement des économies ayant délocalisé leurs industries les plus polluantes plutôt que de véritables ruptures technologiques. Sans nier les progrès réels de l'efficacité énergétique, il paraît dès lors périlleux de fonder l'ensemble d'une stratégie climatique sur cette seule hypothèse, au risque de retarder des choix plus structurels que l'on sait pourtant nécessaires.`,question:`Que critique l'auteur à propos des exemples de découplage absolu généralement cités ?`,options:[`Ils sont trop peu nombreux pour être significatifs`,`Ils concernent uniquement des petits pays`,`Ils s'expliquent surtout par la délocalisation d'industries polluantes`,`Ils datent tous d'avant la crise climatique`],correct:2},
+  {level:"C1",topic:"Santé",passage:`Réduire la santé à une simple absence de maladie relève d'une conception étroitement biomédicale que la définition même de l'Organisation mondiale de la santé s'attache pourtant à dépasser depuis des décennies, sans que cette ambition trouve véritablement à se traduire dans l'organisation concrète de nos systèmes de soins. Ceux-ci demeurent structurellement orientés vers le curatif, au détriment d'une approche préventive et globale qui prendrait en compte les déterminants sociaux, environnementaux et psychologiques de la santé. Ce décalage persistant entre les principes affichés et les pratiques effectives interroge la réelle volonté politique de transformer un système avant tout pensé pour traiter les symptômes plutôt que leurs causes.`,question:`Quel décalage l'auteur souligne-t-il dans le texte ?`,options:[`Entre les principes affichés et l'organisation réelle des systèmes de soins`,`Entre le coût des soins et les revenus des patients`,`Entre les pays riches et les pays pauvres`,`Entre la médecine traditionnelle et la médecine moderne`],correct:0},
+  {level:"C1",topic:"Voyage",passage:`Dénoncer le surtourisme en s'en tenant à la seule question des flux de visiteurs revient à occulter une dimension plus structurelle du problème, à savoir la financiarisation croissante de l'hébergement touristique, qui a progressivement évincé les habitants des centres historiques au profit de logements de courte durée bien plus lucratifs. Limiter le nombre de touristes sans s'attaquer à ces logiques économiques sous-jacentes reviendrait à traiter un symptôme en ignorant délibérément sa cause première, et risquerait de ne produire que des effets de façade sans résoudre la question de fond du droit à la ville pour ses habitants.`,question:`Selon l'auteur, quelle est la véritable cause structurelle du surtourisme ?`,options:[`Le nombre trop élevé de touristes`,`Le manque de régulation des transports`,`L'absence de taxes de séjour`,`La financiarisation de l'hébergement touristique`],correct:3},
+
+  // ---------- C2 ----------
+  {level:"C2",topic:"Politique",passage:`Il y a quelque chose d'assez vertigineux à observer comment le vocabulaire de l'urgence, jadis réservé aux situations véritablement exceptionnelles, s'est banalisé au point de saturer jusqu'à l'épuisement le discours politique contemporain. Chaque réforme se pare désormais des habits de l'impératif catégorique, chaque mesure devient « indispensable », chaque délai un luxe que l'on ne saurait s'offrir. Cette rhétorique de l'urgence permanente, loin d'être un simple tic de langage, produit un effet pervers bien identifié par les linguistes : elle finit par anesthésier son propre pouvoir de mobilisation, tant l'oreille s'habitue à ne plus distinguer l'alerte véritable du bruit de fond argumentatif.`,question:`Quel effet pervers l'auteur attribue-t-il à la rhétorique de l'urgence permanente ?`,options:[`Elle rend les citoyens plus exigeants envers leurs dirigeants`,`Elle finit par affaiblir sa propre capacité à mobiliser`,`Elle accélère effectivement la mise en œuvre des réformes`,`Elle favorise l'émergence de nouveaux partis politiques`],correct:1},
+  {level:"C2",topic:"Technologie",passage:`La Silicon Valley a ceci de fascinant qu'elle continue de vendre l'idée d'une disruption permanente tout en reproduisant, avec une remarquable constance, les mêmes récits fondateurs depuis un demi-siècle : le garage, le génie visionnaire incompris, la promesse d'un monde meilleur par la seule vertu de l'innovation technique. Ce folklore, aussi séduisant soit-il, dispense commodément d'interroger les rapports de pouvoir bien réels que ces mêmes technologies contribuent à consolider, dissimulant sous le vernis de l'utopie collaborative des logiques de concentration économique parmi les plus abouties de l'histoire du capitalisme.`,question:`Que reproche l'auteur au récit fondateur de la Silicon Valley ?`,options:[`Il est trop récent pour être crédible`,`Il ne correspond plus à la réalité du marché actuel`,`Il masque les logiques de concentration économique qu'il sert`,`Il empêche l'émergence de nouvelles entreprises`],correct:2},
+  {level:"C2",topic:"Environnement",passage:`Opposer, comme on le fait trop souvent, une écologie punitive à une écologie du plaisir relève d'une simplification dont on mesure mal les effets délétères sur le débat public. Cette dichotomie commode occulte en réalité la question bien plus dérangeante des renoncements que suppose toute transformation écologique sérieuse, qu'on les pare ou non des atours de la contrainte. Prétendre qu'une telle mutation pourrait s'opérer sans qu'aucun confort acquis ne soit jamais questionné relève moins de l'optimisme que d'un déni confortable, qui retarde d'autant l'indispensable clarification des priorités collectives.`,question:`Que dénonce l'auteur dans l'opposition entre écologie « punitive » et écologie « du plaisir » ?`,options:[`Elle masque la question des renoncements nécessaires à toute transition`,`Elle est trop technique pour le grand public`,`Elle favorise les partis politiques extrêmes`,`Elle a été inventée par les industriels`],correct:0},
+  {level:"C2",topic:"Santé",passage:`Les progrès fulgurants des biotechnologies placent nos sociétés face à un paradoxe qu'elles peinent encore à nommer clairement : celui de disposer de capacités techniques croissantes sans que nos cadres éthiques, forgés pour l'essentiel au siècle dernier, n'aient véritablement évolué au même rythme. Ce décalage n'est pas sans rappeler d'autres moments de l'histoire des sciences où la puissance d'agir a précédé la sagesse de délibérer, à ceci près que l'ampleur des possibles ouverts par l'édition génétique confère à ce retard une gravité inédite, qui ne laisse guère de place à l'improvisation collective.`,question:`Quel décalage l'auteur met-il en évidence dans ce texte ?`,options:[`Entre les pays développés et les pays en développement`,`Entre les scientifiques et le grand public`,`Entre les générations jeunes et âgées`,`Entre les capacités techniques croissantes et l'évolution des cadres éthiques`],correct:3}
+];
+
+function renderQuestions(){
+  const container = document.getElementById('questions');
+  container.innerHTML = DATA.map((q,i)=>{
+    const num = i+1;
+    const optionsHtml = q.options.map((opt,j)=>{
+      const letter = String.fromCharCode(65+j);
+      return `<label class="opt" data-qi="${i}" data-oi="${j}">
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="optletter">${letter}</span>
+        <span class="opttext">${opt}</span>
+      </label>`;
+    }).join('');
+    return `<section class="qcard" id="qcard-${i}">
+      <div class="qhead">
+        <span class="qnum">${num}</span>
+        <span class="qtag" id="qtag-${i}"></span>
+      </div>
+      <div class="passage">${q.passage}</div>
+      <p class="qtext">${q.question}</p>
+      <div class="options">${optionsHtml}</div>
+    </section>`;
+  }).join('');
+}
+
+function updateProgress(){
+  let answered = 0;
+  DATA.forEach((_,i)=>{ if(document.querySelector(`input[name="q${i}"]:checked`)) answered++; });
+  document.getElementById('answeredCount').textContent = answered;
+  document.getElementById('progressFill').style.width = (answered/DATA.length*100)+'%';
+}
+
+function gradeExam(){
+  let score = 0;
+  const levels = ['A1','A2','B1','B2','C1','C2'];
+  const stats = {};
+  levels.forEach(l=>stats[l]={correct:0,total:0});
+
+  DATA.forEach((q,i)=>{
+    stats[q.level].total++;
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    const selIndex = selected ? parseInt(selected.value,10) : null;
+    const isCorrect = selIndex === q.correct;
+    if(isCorrect){ score++; stats[q.level].correct++; }
+
+    document.querySelectorAll(`#qcard-${i} .opt`).forEach(label=>{
+      const oi = parseInt(label.dataset.oi,10);
+      label.querySelector('input').disabled = true;
+      if(oi === q.correct) label.classList.add('is-correct');
+      else if(oi === selIndex) label.classList.add('is-incorrect');
+    });
+
+    const tag = document.getElementById(`qtag-${i}`);
+    if(selIndex === null){
+      tag.textContent = 'Non répondu';
+      tag.classList.add('flag');
+      document.getElementById(`qcard-${i}`).classList.add('unanswered');
+    }
+  });
+
+  document.getElementById('scoreValue').textContent = score;
+  document.getElementById('levelBreakdown').innerHTML = levels.map(l=>{
+    const s = stats[l];
+    const pct = s.total ? Math.round((s.correct/s.total)*100) : 0;
+    return `<div class="lvrow">
+      <span class="lvname">${l}</span>
+      <div class="lvbar"><div class="lvfill" style="width:${pct}%"></div></div>
+      <span class="lvfrac">${s.correct}/${s.total}</span>
+    </div>`;
+  }).join('');
+
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const actionbar = document.getElementById('actionbar');
+  actionbar.innerHTML = `<span>Examen corrigé — ${score}/${DATA.length}</span><button type="button" class="ghost" id="resetBtn">Recommencer</button>`;
+  document.getElementById('resetBtn').addEventListener('click', ()=>location.reload());
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  results.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth'});
+}
+
+document.getElementById('questions').addEventListener('change', e=>{
+  if(e.target.matches('input[type="radio"]')){
+    const label = e.target.closest('.opt');
+    label.closest('.options').querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+    label.classList.add('selected');
+    updateProgress();
+  }
+});
+
+document.getElementById('submitBtn').addEventListener('click', ()=>{
+  let answered = 0;
+  DATA.forEach((_,i)=>{ if(document.querySelector(`input[name="q${i}"]:checked`)) answered++; });
+  if(answered < DATA.length){
+    const proceed = confirm(`Il reste ${DATA.length - answered} question(s) sans réponse. Soumettre quand même ?`);
+    if(!proceed) return;
+  }
+  gradeExam();
+});
+
+renderQuestions();
+updateProgress();
+</script>
+</body>
+</html>
