@@ -11,7 +11,7 @@
     position: fixed;
     right: 12px;
     bottom: 12px;
-    display: none;
+    display: block;
     background: #19252b;
     color: #fff;
     border-radius: 10px;
@@ -42,16 +42,24 @@
   const BIN_ID = 'PASTE_BIN_ID';
   const API_KEY = 'PASTE_READ_ONLY_ACCESS_KEY';
 
+  // Set to 'X-Master-Key' if you are using your master key, 'X-Access-Key' for a read-only access key
+  const KEY_HEADER = 'X-Access-Key';
+
   async function fetchScore() {
     try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Access-Key': API_KEY } });
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { [KEY_HEADER]: API_KEY } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = (await res.json()).record;
+      document.getElementById('team').style.color = '#fff';
       const bat = d.battingSide || 'team1';
       document.getElementById('team').innerText = bat === 'team1' ? (d.team1Name || 'TEAM 1') : (d.team2Name || 'TEAM 2');
       document.getElementById('score').innerText = d.score || '0-0';
       document.getElementById('overs').innerText = '(' + (d.overs || '0.0') + ')';
       document.getElementById('card').style.display = 'block';
-    } catch (e) { console.log(e); }
+    } catch (e) {
+      console.log(e);
+      document.getElementById('team').style.color = '#ff5252';  // red name = cannot reach the data
+    }
   }
   setInterval(fetchScore, 4000);
   fetchScore();
