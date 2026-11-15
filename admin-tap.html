@@ -158,18 +158,35 @@
     d.oppScore = S.oppScore;
     [1,2,3,4].forEach(n => { d['p'+n+'Runs'] = String(S.pr[n]); d['p'+n+'Wkts'] = String(S.pw[n]); });
     d.battingSide = S.bat;
-    d._state = S;   // lets the scorer resume after a reload
     return d;
   }
+  let inflight = false, dirty = false;
   function push() {
+    try { localStorage.setItem('tapState', JSON.stringify(S)); } catch (e) {}   // resume after reload
     document.getElementById('status').innerText = 'Updating...';
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(() => {
-      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':API_KEY}, body:JSON.stringify(payload())
-      }).then(r => { document.getElementById('status').innerText = r.ok ? 'Live updated' : 'Update failed (HTTP ' + r.status + ')'; })
-        .catch(() => { document.getElementById('status').innerText = 'No network'; });
-    }, 400);
+    pushTimer = setTimeout(send, 300);
+  }
+  async function send() {
+    if (inflight) { dirty = true; return; }       // one request at a time
+    inflight = true; dirty = false;
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT', signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+        body: JSON.stringify(payload())
+      });
+      let msg = '';
+      if (!r.ok) { try { msg = (await r.json()).message || ''; } catch (e) {} }
+      document.getElementById('status').innerText = r.ok ? 'Live updated' : 'Update failed (HTTP ' + r.status + ') ' + msg;
+    } catch (e) {
+      document.getElementById('status').innerText = e.name === 'AbortError' ? 'Timed out, check internet' : 'Error: ' + e.message;
+    }
+    clearTimeout(to);
+    inflight = false;
+    if (dirty) send();                            // send the newest score if taps came in meanwhile
   }
   function saveNames() { render(); push(); }
 
@@ -208,7 +225,7 @@
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(j => {
       const d = j.record || {};
       ['team1Name','team2Name','color1','color2','p1Name','p2Name','p3Name','p4Name'].forEach(id => { if (d[id]) document.getElementById(id).value = d[id]; });
-      if (d._state) S = d._state;
+      try { const saved = localStorage.getItem('tapState'); if (saved) S = JSON.parse(saved); } catch (e) {}
       render();
       document.getElementById('status').innerText = 'Ready';
     }).catch(e => { render(); document.getElementById('status').innerText = 'Could not load (' + e.message + ')'; });
