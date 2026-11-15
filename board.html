@@ -58,7 +58,9 @@
       document.getElementById('card').style.display = 'block';
     } catch (e) {
       console.log(e);
-      document.getElementById('team').style.color = '#ff5252';  // red name = cannot reach the data
+      const t = document.getElementById('team');
+      t.style.color = '#ff5252';
+      t.innerText = 'ERR ' + (e.message || 'NETWORK');  // shows why the data could not load
     }
   }
   setInterval(fetchScore, 4000);
