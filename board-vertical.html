@@ -30,7 +30,7 @@
 <body>
 
 <div class="score-card" id="card">
-  <div class="team" id="team">MATCH</div>
+  <div class="team"><span id="team">MATCH</span> <span id="dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4caf50;opacity:.25;vertical-align:middle;"></span></div>
   <div class="line">
     <span class="score" id="score">0-0</span>
     <span class="overs" id="overs">(0.0)</span>
@@ -47,7 +47,7 @@
 
   async function fetchScore() {
     try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { [KEY_HEADER]: API_KEY } });
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?_=${Date.now()}`, { headers: { [KEY_HEADER]: API_KEY }, cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = (await res.json()).record;
       document.getElementById('team').style.color = '#fff';
@@ -56,6 +56,8 @@
       document.getElementById('score').innerText = d.score || '0-0';
       document.getElementById('overs').innerText = '(' + (d.overs || '0.0') + ')';
       document.getElementById('card').style.display = 'block';
+      tick = !tick;
+      document.getElementById('dot').style.opacity = tick ? '1' : '0.25';   // blinks each time fresh data arrives
     } catch (e) {
       console.log(e);
       const t = document.getElementById('team');
@@ -63,8 +65,10 @@
       t.innerText = 'ERR ' + (e.message || 'NETWORK');  // shows why the data could not load
     }
   }
-  setInterval(fetchScore, 4000);
-  fetchScore();
+  let tick = false;
+  async function loop() { await fetchScore(); setTimeout(loop, 3000); }   // keeps going even after a failed request
+  loop();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) fetchScore(); });
 </script>
 </body>
 </html>
