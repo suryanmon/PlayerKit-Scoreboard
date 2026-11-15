@@ -1,126 +1,182 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2v2 Admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>2v2 Match Master Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; padding: 15px; max-width: 500px; margin: auto; }
-        .card { background: #1e1e1e; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 15px; border: 1px solid #333; }
-        
+        body { font-family: sans-serif; background: #121212; color: white; padding: 12px; max-width: 500px; margin: auto; -webkit-user-select:none; user-select:none; }
+        .card { background: #1e1e1e; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 12px; border: 1px solid #333; }
         .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
         input[type="text"], input[type="number"] { background: #2c2c2c; color: white; border: 1px solid #444; width: 100%; padding: 10px; border-radius: 6px; box-sizing: border-box; }
-        input[type="color"] { border: none; width: 50px; height: 40px; cursor: pointer; background: transparent; }
-        
+        input[type="color"] { border: none; width: 44px; height: 36px; cursor: pointer; background: transparent; }
         label { font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px; display:block; }
         .team-header { padding: 8px; border-radius: 4px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-
         .toggle-container { display: flex; background: #333; border-radius: 6px; padding: 2px; }
         .toggle-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; border-radius: 4px; color: #888; }
         .toggle-btn.active { background: #00acee; color: white; }
         input[type="radio"] { display: none; }
-
-        .btn-reset { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; margin-top: 15px; opacity: 0.8; }
+        .big { text-align:center; font-size:40px; font-weight:800; line-height:1; color: #ffeb3b; }
+        .sub { text-align:center; color:#aaa; font-size:13px; margin-top:6px; }
+        .chips { display:flex; gap:6px; margin-bottom:8px; }
+        .chip { flex:1; padding:10px 4px; text-align:center; background:#333; border-radius:8px; font-size:12px; font-weight:bold; color:#aaa; cursor:pointer; }
+        .chip.on { background:#00acee; color:#fff; }
+        .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom: 8px; }
+        .b { padding:18px 0; font-size:20px; font-weight:800; border:none; border-radius:10px; background:#2c2c2c; color:#fff; cursor:pointer; }
+        .b:active { transform:scale(.95); }
+        .b.four { background:#2e7d32; } .b.six { background:#6a1b9a; } .b.w { background:#c62828; } .b.x { background:#ef6c00; font-size:15px; }
+        .b.u { background:#455a64; font-size:15px; }
+        .wide { width:100%; padding:14px; border:none; border-radius:8px; font-weight:bold; font-size:14px; color:#fff; margin-top:6px; cursor:pointer; }
+        details summary { cursor:pointer; font-weight:bold; font-size:13px; color:#00acee; }
+        .btn-reset { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; margin-top: 8px; }
     </style>
 </head>
 <body>
-    <h3 style="text-align:center; margin:0 0 15px 0;">🏏 Match Controller</h3>
+    <h3 style="text-align:center; margin:0 0 10px 0;">🏏 2v2 Match Master Controller</h3>
 
+    <!-- Live Status Card -->
     <div class="card">
-        <label>Who is Batting Now?</label>
+        <div class="big" id="liveScore">0-0</div>
+        <div class="sub"><span id="liveOvers">0.0</span> ov  |  <span id="liveInfo">Innings 1</span></div>
+    </div>
+
+    <!-- Tap Scoring Panel -->
+    <div class="card">
+        <label>Striker (Batting Team)</label>
+        <div class="chips" id="strikerChips"></div>
+        <label>Bowler (Fielding Team)</label>
+        <div class="chips" id="bowlerChips"></div>
+
+        <div class="grid" style="margin-top: 10px;">
+            <button class="b" onclick="ball(0)">0</button>
+            <button class="b" onclick="ball(1)">1</button>
+            <button class="b" onclick="ball(2)">2</button>
+            <button class="b" onclick="ball(3)">3</button>
+            <button class="b four" onclick="ball(4)">4</button>
+            <button class="b six" onclick="ball(6)">6</button>
+            <button class="b w" onclick="wicket()">OUT</button>
+            <button class="b x" onclick="extra()">WD/NB</button>
+        </div>
+        <div class="row">
+            <button class="b u" style="flex:1" onclick="undo()">UNDO</button>
+            <button class="b u" style="flex:1" onclick="swapStriker()">SWAP</button>
+        </div>
+
+        <button class="wide" id="voiceBtn" style="background:#6a1b9a" onclick="toggleVoice()">VOICE SCORING: OFF</button>
+        <div id="heard" style="text-align:center;font-size:11px;color:#888;margin-top:4px;">Say: dot, one, two, three, four, six, out, wide, undo</div>
+
+        <button class="wide" style="background:#00acee" onclick="nextInnings()">END INNINGS / START 2ND</button>
+    </div>
+
+    <!-- Who is Batting Now toggle -->
+    <div class="card">
+        <label>Batting Side Mode</label>
         <div class="toggle-container">
-            <label class="toggle-btn active" id="btnT1" onclick="setBatting('team1'); queueSave();">
+            <label class="toggle-btn active" id="btnT1" onclick="setBattingSide('team1')">
                 TEAM 1 (Left)
                 <input type="radio" name="batSide" id="batSide1" value="team1" checked>
             </label>
-            <label class="toggle-btn" id="btnT2" onclick="setBatting('team2'); queueSave();">
+            <label class="toggle-btn" id="btnT2" onclick="setBattingSide('team2')">
                 TEAM 2 (Right)
                 <input type="radio" name="batSide" id="batSide2" value="team2">
             </label>
         </div>
-
-        <div style="margin-top:15px;"></div>
-
-        <div class="row">
-            <div style="flex:1">
-                <label>Score</label>
-                <input type="text" id="score" placeholder="0-0">
-            </div>
-            <div style="flex:1">
-                <label>Overs</label>
-                <input type="text" id="overs" placeholder="0.0">
-            </div>
-            <div style="flex:1">
-                <label>Target</label>
-                <input type="number" id="target" placeholder="0">
-            </div>
-        </div>
-        
-        <div class="row">
-            <div style="flex:1">
-                <label>Opponent / Previous Score</label>
-                <input type="text" id="oppScore" placeholder="e.g. PANGERS 24-2">
-            </div>
-        </div>
     </div>
 
-    <div class="card" style="border-left: 4px solid #fff;" id="card1">
+    <!-- Team 1 Details Card -->
+    <div class="card" style="border-left: 4px solid #0277bd;" id="card1">
         <div class="team-header">
-            <span>TEAM 1 (Left)</span>
+            <span id="labelTeam1">TEAM 1 (Left)</span>
             <input type="color" id="color1" value="#0277bd">
         </div>
-        <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
+        <input type="text" id="team1Name" placeholder="Team 1 Name" style="margin-bottom:10px;">
         <div class="row">
-            <div style="flex:2"><label>P1 Name</label><input type="text" id="p1Name" placeholder="Name"></div>
-            <div style="flex:1"><label>Runs</label><input type="number" id="p1Runs" placeholder="0"></div>
-            <div style="flex:1"><label>Wkts</label><input type="number" id="p1Wkts" placeholder="0"></div>
+            <div style="flex:2"><label>P1 Name</label><input type="text" id="p1Name" placeholder="Player 1"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p1Runs" value="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p1Wkts" value="0"></div>
         </div>
         <div class="row">
-            <div style="flex:2"><label>P2 Name</label><input type="text" id="p2Name" placeholder="Name"></div>
-            <div style="flex:1"><label>Runs</label><input type="number" id="p2Runs" placeholder="0"></div>
-            <div style="flex:1"><label>Wkts</label><input type="number" id="p2Wkts" placeholder="0"></div>
+            <div style="flex:2"><label>P2 Name</label><input type="text" id="p2Name" placeholder="Player 2"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p2Runs" value="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p2Wkts" value="0"></div>
         </div>
     </div>
 
-    <div class="card" style="border-right: 4px solid #fff;" id="card2">
+    <!-- Team 2 Details Card -->
+    <div class="card" style="border-right: 4px solid #c62828;" id="card2">
         <div class="team-header">
-            <span>TEAM 2 (Right)</span>
+            <span id="labelTeam2">TEAM 2 (Right)</span>
             <input type="color" id="color2" value="#c62828">
         </div>
-        <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
+        <input type="text" id="team2Name" placeholder="Team 2 Name" style="margin-bottom:10px;">
         <div class="row">
-            <div style="flex:2"><label>P3 Name</label><input type="text" id="p3Name" placeholder="Name"></div>
-            <div style="flex:1"><label>Runs</label><input type="number" id="p3Runs" placeholder="0"></div>
-            <div style="flex:1"><label>Wkts</label><input type="number" id="p3Wkts" placeholder="0"></div>
+            <div style="flex:2"><label>P3 Name</label><input type="text" id="p3Name" placeholder="Player 3"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p3Runs" value="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p3Wkts" value="0"></div>
         </div>
         <div class="row">
-            <div style="flex:2"><label>P4 Name</label><input type="text" id="p4Name" placeholder="Name"></div>
-            <div style="flex:1"><label>Runs</label><input type="number" id="p4Runs" placeholder="0"></div>
-            <div style="flex:1"><label>Wkts</label><input type="number" id="p4Wkts" placeholder="0"></div>
+            <div style="flex:2"><label>P4 Name</label><input type="text" id="p4Name" placeholder="Player 4"></div>
+            <div style="flex:1"><label>Runs</label><input type="number" id="p4Runs" value="0"></div>
+            <div style="flex:1"><label>Wkts</label><input type="number" id="p4Wkts" value="0"></div>
         </div>
     </div>
 
-    <button onclick="resetBoard()" class="btn-reset">⚠️ RESET SCORES</button>
-    
+    <!-- Match Settings & Manual Overrides -->
+    <details class="card">
+        <summary>Advanced / Manual Overrides</summary>
+        <div style="margin-top:10px;">
+            <div class="row">
+                <div style="flex:1"><label>Score Override</label><input type="text" id="score" placeholder="0-0"></div>
+                <div style="flex:1"><label>Overs Override</label><input type="text" id="overs" placeholder="0.0"></div>
+            </div>
+            <div class="row">
+                <div style="flex:1"><label>Target</label><input type="number" id="target" placeholder="0"></div>
+                <div style="flex:1"><label>Opponent Score</label><input type="text" id="oppScore" placeholder="e.g. TEAM 24-2"></div>
+            </div>
+        </div>
+    </details>
+
+    <button onclick="resetBoard()" class="btn-reset">⚠️ RESET ALL SCORES</button>
     <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Loading...</div>
 
     <script>
-        // --- KEYS ---
         const BIN_ID = '6937d64fae596e708f8d16a9'; 
         const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
-        // ------------
 
         const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 'oppScore',
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
 
-        let loaded = false;       // never save before the current data has loaded, or blank boxes would overwrite it
+        let loaded = false;
         let saveTimer = null, inflight = false, dirty = false;
+        let history = [];
 
-        function setBatting(team) {
+        let S = {
+            bat: 'team1', runs: 0, wkts: 0, balls: 0,
+            striker: 1, bowler: 3, innings: 1, target: 0, oppScore: '',
+            pr: {1:0, 2:0, 3:0, 4:0}, pw: {1:0, 2:0, 3:0, 4:0}
+        };
+        const MAX_BALLS = 24;
+
+        const batPlayers = () => S.bat === 'team1' ? [1, 2] : [3, 4];
+        const fieldPlayers = () => S.bat === 'team1' ? [3, 4] : [1, 2];
+        const pname = n => (document.getElementById('p' + n + 'Name').value || 'P' + n);
+
+        function snap() { history.push(JSON.stringify(S)); if (history.length > 60) history.shift(); }
+        function undo() { if (!history.length) return; S = JSON.parse(history.pop()); syncStateToDOM(); push(); }
+
+        function ballsDone() { return S.balls >= MAX_BALLS; }
+        function overs() { return Math.floor(S.balls / 6) + '.' + (S.balls % 6); }
+
+        function setBattingSide(team, skipPush = false) {
+            S.bat = team;
             document.getElementById('btnT1').className = team === 'team1' ? 'toggle-btn active' : 'toggle-btn';
             document.getElementById('btnT2').className = team === 'team2' ? 'toggle-btn active' : 'toggle-btn';
             document.getElementById('batSide1').checked = (team === 'team1');
             document.getElementById('batSide2').checked = (team === 'team2');
+            if (!batPlayers().includes(S.striker)) S.striker = batPlayers()[0];
+            if (!fieldPlayers().includes(S.bowler)) S.bowler = fieldPlayers()[0];
+            renderUI();
+            if (!skipPush) push();
         }
 
         function updateColors() {
@@ -128,48 +184,158 @@
             document.getElementById('card2').style.borderColor = document.getElementById('color2').value;
         }
 
-        // Auto save: any change in any box is sent 0.6 s after you stop typing
+        function ball(r) {
+            if (ballsDone()) return alert('Innings over. Start 2nd innings or reset.');
+            snap();
+            S.runs += r; S.pr[S.striker] += r; S.balls++;
+            if (r % 2 === 1) swapStrikerQuiet();
+            if (S.balls % 6 === 0) swapStrikerQuiet();
+            syncStateToDOM();
+            push();
+        }
+        function wicket() {
+            if (ballsDone()) return;
+            snap();
+            S.wkts++; S.pw[S.bowler]++; S.balls++;
+            if (S.balls % 6 === 0) swapStrikerQuiet();
+            syncStateToDOM();
+            push();
+        }
+        function extra() { snap(); S.runs += 1; syncStateToDOM(); push(); }
+        function swapStrikerQuiet() { const p = batPlayers(); S.striker = (S.striker === p[0]) ? p[1] : p[0]; }
+        function swapStriker() { snap(); swapStrikerQuiet(); syncStateToDOM(); push(); }
+
+        function nextInnings() {
+            if (!confirm('End this innings and start the next one?')) return;
+            snap();
+            const tn = S.bat === 'team1' ? (document.getElementById('team1Name').value || 'TEAM 1') : (document.getElementById('team2Name').value || 'TEAM 2');
+            S.oppScore = tn + ' ' + S.runs + '-' + S.wkts;
+            S.target = S.runs + 1;
+            setBattingSide(S.bat === 'team1' ? 'team2' : 'team1', true);
+            S.runs = 0; S.wkts = 0; S.balls = 0; S.innings = 2;
+            S.striker = batPlayers()[0]; S.bowler = fieldPlayers()[0];
+            syncStateToDOM();
+            push();
+        }
+
+        function resetBoard() {
+            if (!confirm('⚠️ Are you sure? This will reset SCORES to 0 but keep names.')) return;
+            snap();
+            S = {
+                bat: 'team1', runs: 0, wkts: 0, balls: 0,
+                striker: 1, bowler: 3, innings: 1, target: 0, oppScore: '',
+                pr: {1:0, 2:0, 3:0, 4:0}, pw: {1:0, 2:0, 3:0, 4:0}
+            };
+            syncStateToDOM();
+            push();
+        }
+
+        function pick(kind, n) { snap(); if (kind === 's') S.striker = n; else S.bowler = n; renderUI(); push(); }
+
+        function syncStateToDOM() {
+            document.getElementById('score').value = S.runs + '-' + S.wkts;
+            document.getElementById('overs').value = overs();
+            document.getElementById('target').value = S.target ? S.target : '';
+            document.getElementById('oppScore').value = S.oppScore;
+            [1,2,3,4].forEach(n => {
+                document.getElementById('p' + n + 'Runs').value = S.pr[n];
+                document.getElementById('p' + n + 'Wkts').value = S.pw[n];
+            });
+            renderUI();
+        }
+
+        function syncDOMToState() {
+            const scoreParts = document.getElementById('score').value.split('-');
+            if (scoreParts.length === 2) {
+                S.runs = parseInt(scoreParts[0]) || 0;
+                S.wkts = parseInt(scoreParts[1]) || 0;
+            }
+            const ovParts = document.getElementById('overs').value.split('.');
+            if (ovParts.length > 0) {
+                const completedOvers = parseInt(ovParts[0]) || 0;
+                const ballsInOver = parseInt(ovParts[1]) || 0;
+                S.balls = completedOvers * 6 + ballsInOver;
+            }
+            S.target = parseInt(document.getElementById('target').value) || 0;
+            S.oppScore = document.getElementById('oppScore').value;
+            [1,2,3,4].forEach(n => {
+                S.pr[n] = parseInt(document.getElementById('p' + n + 'Runs').value) || 0;
+                S.pw[n] = parseInt(document.getElementById('p' + n + 'Wkts').value) || 0;
+            });
+            renderUI();
+        }
+
+        function renderUI() {
+            document.getElementById('liveScore').innerText = S.runs + '-' + S.wkts;
+            document.getElementById('liveOvers').innerText = overs();
+            let info = 'Innings ' + S.innings;
+            if (S.target) info += ' | Need ' + Math.max(S.target - S.runs, 0) + ' from ' + Math.max(MAX_BALLS - S.balls, 0) + ' balls';
+            document.getElementById('liveInfo').innerText = info;
+
+            document.getElementById('strikerChips').innerHTML = batPlayers().map(n =>
+                `<div class="chip ${S.striker===n?'on':''}" onclick="pick('s',${n})">${pname(n)} (${S.pr[n]})</div>`).join('');
+            document.getElementById('bowlerChips').innerHTML = fieldPlayers().map(n =>
+                `<div class="chip ${S.bowler===n?'on':''}" onclick="pick('b',${n})">${pname(n)} (${S.pw[n]}w)</div>`).join('');
+            updateColors();
+        }
+
+        function buildPayload() {
+            const d = {};
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                d[id] = el ? el.value : '';
+            });
+            d.battingSide = S.bat;
+            d.score = S.runs + '-' + S.wkts;
+            d.overs = overs();
+            d.target = S.target ? String(S.target) : '';
+            d.oppScore = S.oppScore;
+            [1,2,3,4].forEach(n => {
+                d['p'+n+'Runs'] = String(S.pr[n]);
+                d['p'+n+'Wkts'] = String(S.pw[n]);
+            });
+            return d;
+        }
+
         function queueSave() {
             if (!loaded) return;
+            syncDOMToState();
             document.getElementById('status').innerText = 'Updating...';
             clearTimeout(saveTimer);
-            saveTimer = setTimeout(send, 600);
+            saveTimer = setTimeout(send, 400);
         }
+
         ids.forEach(id => {
             const el = document.getElementById(id);
-            el.addEventListener('input', queueSave);
-            el.addEventListener('change', queueSave);
+            if (el) {
+                el.addEventListener('input', queueSave);
+                el.addEventListener('change', queueSave);
+            }
         });
-        ['color1', 'color2'].forEach(id => document.getElementById(id).addEventListener('input', updateColors));
+        ['color1', 'color2', 'team1Name', 'team2Name', 'p1Name', 'p2Name', 'p3Name', 'p4Name'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => { renderUI(); queueSave(); });
+        });
 
-        // Load current data
-        fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {headers: {'X-Master-Key': API_KEY}})
-            .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-            .then(json => {
-                const d = json.record;
-                ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = d[id] || ""; });
-                setBatting(d.battingSide || 'team1');
-                updateColors();
-                loaded = true;
-                document.getElementById('status').innerText = 'Ready (changes save automatically)';
-            })
-            .catch(e => { document.getElementById('status').innerText = 'Could not load (' + e.message + '), saving is off'; });
+        async function push() {
+            if (!loaded) return;
+            try { localStorage.setItem('tapState', JSON.stringify(S)); } catch (e) {}
+            send();
+        }
 
         async function send() {
             if (inflight) { dirty = true; return; }
             inflight = true; dirty = false;
-            let data = {};
-            ids.forEach(id => data[id] = document.getElementById(id).value);
-            data.battingSide = document.getElementById('batSide1').checked ? 'team1' : 'team2';
+            document.getElementById('status').innerText = 'Updating...';
             const ctrl = new AbortController();
             const to = setTimeout(() => ctrl.abort(), 10000);
             try {
                 const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT', signal: ctrl.signal,
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(buildPayload())
                 });
-                document.getElementById('status').innerText = r.ok ? 'Updated!' : 'Update failed (HTTP ' + r.status + ')';
+                document.getElementById('status').innerText = r.ok ? 'Updated live!' : 'Update failed (HTTP ' + r.status + ')';
             } catch (e) {
                 document.getElementById('status').innerText = e.name === 'AbortError' ? 'Timed out, check internet' : 'Error: ' + e.message;
             }
@@ -178,12 +344,66 @@
             if (dirty) send();
         }
 
-        function resetBoard() {
-            if(!confirm("⚠️ Are you sure? This will reset SCORES to 0 but keep names.")) return;
-            const resetIds = ['score', 'overs', 'target', 'oppScore', 'p1Runs', 'p1Wkts', 'p2Runs', 'p2Wkts', 'p3Runs', 'p3Wkts', 'p4Runs', 'p4Wkts'];
-            resetIds.forEach(id => document.getElementById(id).value = "");
-            queueSave();
+        let rec = null, voiceOn = false;
+        const WORDS = {
+            dot:'0', zero:'0', nothing:'0', one:'1', single:'1', won:'1', two:'2', double:'2', three:'3',
+            four:'4', boundary:'4', six:'6', sixer:'6', out:'W', wicket:'W', bowled:'W', wide:'X', noball:'X', undo:'U', cancel:'U'
+        };
+        function handleVoice(text) {
+            const words = text.toLowerCase().replace('no ball','noball').split(/[^a-z]+/);
+            for (const w of words) {
+                const k = WORDS[w];
+                if (!k) continue;
+                document.getElementById('heard').innerText = 'Heard: "' + w + '"';
+                if (k === 'W') wicket(); else if (k === 'X') extra(); else if (k === 'U') undo(); else ball(parseInt(k, 10));
+                return;
+            }
+            document.getElementById('heard').innerText = 'Not understood: "' + text + '"';
         }
+        function toggleVoice() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) return alert('Voice is not supported in this browser. Use Safari (iPhone) or Chrome (Android).');
+            const btn = document.getElementById('voiceBtn');
+            if (voiceOn) { voiceOn = false; rec.stop(); btn.innerText = 'VOICE SCORING: OFF'; return; }
+            rec = new SR();
+            rec.lang = 'en-IN'; rec.continuous = true; rec.interimResults = false;
+            rec.onresult = e => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) handleVoice(e.results[i][0].transcript); };
+            rec.onend = () => { if (voiceOn) { try { rec.start(); } catch (e) {} } };
+            rec.onerror = e => { document.getElementById('heard').innerText = 'Mic error: ' + e.error; };
+            voiceOn = true; rec.start(); btn.innerText = 'VOICE SCORING: ON (listening)';
+        }
+
+        fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+            .then(json => {
+                const d = json.record || {};
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && d[id] !== undefined) el.value = d[id];
+                });
+                setBattingSide(d.battingSide || 'team1', true);
+                
+                try {
+                    const saved = localStorage.getItem('tapState');
+                    if (saved) {
+                        S = JSON.parse(saved);
+                    } else {
+                        syncDOMToState();
+                    }
+                } catch (e) {
+                    syncDOMToState();
+                }
+
+                syncStateToDOM();
+                updateColors();
+                loaded = true;
+                document.getElementById('status').innerText = 'Ready (auto-saving enabled)';
+            })
+            .catch(e => {
+                document.getElementById('status').innerText = 'Could not load (' + e.message + '), offline mode';
+                loaded = true;
+                syncDOMToState();
+            });
     </script>
 </body>
 </html>
