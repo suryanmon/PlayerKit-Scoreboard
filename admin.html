@@ -19,7 +19,6 @@
         .toggle-btn.active { background: #00acee; color: white; }
         input[type="radio"] { display: none; }
 
-        .btn-update { width: 100%; padding: 15px; background: #00acee; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(0, 172, 238, 0.4); }
         .btn-reset { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; margin-top: 15px; opacity: 0.8; }
     </style>
 </head>
@@ -29,11 +28,11 @@
     <div class="card">
         <label>Who is Batting Now?</label>
         <div class="toggle-container">
-            <label class="toggle-btn active" id="btnT1" onclick="setBatting('team1')">
+            <label class="toggle-btn active" id="btnT1" onclick="setBatting('team1'); queueSave();">
                 TEAM 1 (Left)
                 <input type="radio" name="batSide" id="batSide1" value="team1" checked>
             </label>
-            <label class="toggle-btn" id="btnT2" onclick="setBatting('team2')">
+            <label class="toggle-btn" id="btnT2" onclick="setBatting('team2'); queueSave();">
                 TEAM 2 (Right)
                 <input type="radio" name="batSide" id="batSide2" value="team2">
             </label>
@@ -67,7 +66,7 @@
     <div class="card" style="border-left: 4px solid #fff;" id="card1">
         <div class="team-header">
             <span>TEAM 1 (Left)</span>
-            <input type="color" id="color1" value="#0277bd" onchange="updateColors()">
+            <input type="color" id="color1" value="#0277bd">
         </div>
         <input type="text" id="team1Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
@@ -85,7 +84,7 @@
     <div class="card" style="border-right: 4px solid #fff;" id="card2">
         <div class="team-header">
             <span>TEAM 2 (Right)</span>
-            <input type="color" id="color2" value="#c62828" onchange="updateColors()">
+            <input type="color" id="color2" value="#c62828">
         </div>
         <input type="text" id="team2Name" placeholder="Team Name" style="margin-bottom:10px;">
         <div class="row">
@@ -100,10 +99,9 @@
         </div>
     </div>
 
-    <button onclick="updateScore()" id="btn" class="btn-update">UPDATE BOARD</button>
     <button onclick="resetBoard()" class="btn-reset">⚠️ RESET SCORES</button>
     
-    <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Ready</div>
+    <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Loading...</div>
 
     <script>
         // --- KEYS ---
@@ -114,6 +112,9 @@
         const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 'oppScore',
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
+
+        let loaded = false;       // never save before the current data has loaded, or blank boxes would overwrite it
+        let saveTimer = null, inflight = false, dirty = false;
 
         function setBatting(team) {
             document.getElementById('btnT1').className = team === 'team1' ? 'toggle-btn active' : 'toggle-btn';
@@ -127,34 +128,61 @@
             document.getElementById('card2').style.borderColor = document.getElementById('color2').value;
         }
 
-        // Load
+        // Auto save: any change in any box is sent 0.6 s after you stop typing
+        function queueSave() {
+            if (!loaded) return;
+            document.getElementById('status').innerText = 'Updating...';
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(send, 600);
+        }
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', queueSave);
+            el.addEventListener('change', queueSave);
+        });
+        ['color1', 'color2'].forEach(id => document.getElementById(id).addEventListener('input', updateColors));
+
+        // Load current data
         fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {headers: {'X-Master-Key': API_KEY}})
-            .then(res => res.json()).then(json => {
+            .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+            .then(json => {
                 const d = json.record;
                 ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = d[id] || ""; });
                 setBatting(d.battingSide || 'team1');
                 updateColors();
-            });
+                loaded = true;
+                document.getElementById('status').innerText = 'Ready (changes save automatically)';
+            })
+            .catch(e => { document.getElementById('status').innerText = 'Could not load (' + e.message + '), saving is off'; });
 
-        function updateScore() {
-            document.getElementById('btn').innerText = "Updating...";
+        async function send() {
+            if (inflight) { dirty = true; return; }
+            inflight = true; dirty = false;
             let data = {};
             ids.forEach(id => data[id] = document.getElementById(id).value);
             data.battingSide = document.getElementById('batSide1').checked ? 'team1' : 'team2';
-
-            fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data)
-            }).then(() => {
-                document.getElementById('btn').innerText = "UPDATE BOARD";
-                document.getElementById('status').innerText = "Updated!";
-            });
+            const ctrl = new AbortController();
+            const to = setTimeout(() => ctrl.abort(), 10000);
+            try {
+                const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT', signal: ctrl.signal,
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(data)
+                });
+                document.getElementById('status').innerText = r.ok ? 'Updated!' : 'Update failed (HTTP ' + r.status + ')';
+            } catch (e) {
+                document.getElementById('status').innerText = e.name === 'AbortError' ? 'Timed out, check internet' : 'Error: ' + e.message;
+            }
+            clearTimeout(to);
+            inflight = false;
+            if (dirty) send();
         }
 
         function resetBoard() {
             if(!confirm("⚠️ Are you sure? This will reset SCORES to 0 but keep names.")) return;
             const resetIds = ['score', 'overs', 'target', 'oppScore', 'p1Runs', 'p1Wkts', 'p2Runs', 'p2Wkts', 'p3Runs', 'p3Wkts', 'p4Runs', 'p4Wkts'];
             resetIds.forEach(id => document.getElementById(id).value = "");
-            updateScore(); 
+            queueSave();
         }
     </script>
 </body>
