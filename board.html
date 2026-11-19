@@ -26,11 +26,9 @@
 </div>
 
 <script>
-  const BIN_ID = 'PASTE_NEW_BIN_ID';
-  const API_KEY = 'PASTE_NEW_KEY';
-  const KEY_HEADER = 'X-Master-Key';
-  const POLL_MS = 5000;
-
+  const BLOB_ID = 'PASTE_JSONBLOB_ID_HERE';
+  const URL_ = 'https://jsonblob.com/api/jsonBlob/' + BLOB_ID;
+  const POLL_MS = 3000;
   let tick = false, fails = 0;
 
   function render(d) {
@@ -42,26 +40,23 @@
     document.getElementById('dot').style.opacity = tick ? '1' : '0.25';
   }
 
-  // Local backup channel (same browser as admin page)
-  try {
-    const ch = new BroadcastChannel('score');
-    ch.onmessage = e => render(e.data);
-  } catch (e) {}
+  // Local backup: instant updates from admin page in the same browser
+  try { const ch = new BroadcastChannel('score'); ch.onmessage = e => render(e.data); } catch (e) {}
 
   async function fetchScore() {
     try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?_=${Date.now()}`, { headers: { [KEY_HEADER]: API_KEY }, cache: 'no-store' });
+      const res = await fetch(URL_ + '?_=' + Date.now(), { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      render((await res.json()).record);
+      render(await res.json());
       fails = 0;
       document.getElementById('dot').style.background = '#4caf50';
     } catch (e) {
       fails++;
-      document.getElementById('dot').style.background = '#ff5252';  // tiny red dot only, score stays visible
+      document.getElementById('dot').style.background = '#ff5252'; // tiny red dot only; score stays visible
       console.log(e);
     }
   }
-  async function loop() { await fetchScore(); setTimeout(loop, Math.min(POLL_MS * (1 + fails), 30000)); }
+  async function loop() { await fetchScore(); setTimeout(loop, Math.min(POLL_MS * (1 + fails), 20000)); }
   loop();
 </script>
 </body>
