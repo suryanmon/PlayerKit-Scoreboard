@@ -323,10 +323,12 @@
             send();
         }
 
+        const ch = new BroadcastChannel('score');   // add this near BIN_ID
+
         async function send() {
+            try { ch.postMessage(buildPayload()); } catch (e) {}   // local backup, works even if JSONBin is down
             if (inflight) { dirty = true; return; }
             inflight = true; dirty = false;
-            document.getElementById('status').innerText = 'Updating...';
             const ctrl = new AbortController();
             const to = setTimeout(() => ctrl.abort(), 10000);
             try {
@@ -335,9 +337,9 @@
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
                     body: JSON.stringify(buildPayload())
                 });
-                document.getElementById('status').innerText = r.ok ? 'Updated live!' : 'Update failed (HTTP ' + r.status + ')';
+                document.getElementById('status').innerText = r.ok ? 'Updated live!' : 'Cloud failed (HTTP ' + r.status + ') - local backup active';
             } catch (e) {
-                document.getElementById('status').innerText = e.name === 'AbortError' ? 'Timed out, check internet' : 'Error: ' + e.message;
+                document.getElementById('status').innerText = 'Cloud error - local backup active';
             }
             clearTimeout(to);
             inflight = false;
