@@ -33,13 +33,11 @@
 <body>
     <h3 style="text-align:center; margin:0 0 10px 0;">🏏 2v2 Match Master Controller</h3>
 
-    <!-- Live Status Card -->
     <div class="card">
         <div class="big" id="liveScore">0-0</div>
-        <div class="sub"><span id="liveOvers">0.0</span> ov  |  <span id="liveInfo">Innings 1</span></div>
+        <div class="sub"><span id="liveOvers">0.0</span> ov  |  <span id="liveInfo">Innings 1</span></div>
     </div>
 
-    <!-- Tap Scoring Panel -->
     <div class="card">
         <label>Striker (Batting Team)</label>
         <div class="chips" id="strikerChips"></div>
@@ -67,7 +65,6 @@
         <button class="wide" style="background:#00acee" onclick="nextInnings()">END INNINGS / START 2ND</button>
     </div>
 
-    <!-- Who is Batting Now toggle -->
     <div class="card">
         <label>Batting Side Mode</label>
         <div class="toggle-container">
@@ -82,7 +79,6 @@
         </div>
     </div>
 
-    <!-- Team 1 Details Card -->
     <div class="card" style="border-left: 4px solid #0277bd;" id="card1">
         <div class="team-header">
             <span id="labelTeam1">TEAM 1 (Left)</span>
@@ -101,7 +97,6 @@
         </div>
     </div>
 
-    <!-- Team 2 Details Card -->
     <div class="card" style="border-right: 4px solid #c62828;" id="card2">
         <div class="team-header">
             <span id="labelTeam2">TEAM 2 (Right)</span>
@@ -120,7 +115,6 @@
         </div>
     </div>
 
-    <!-- Match Settings & Manual Overrides -->
     <details class="card">
         <summary>Advanced / Manual Overrides</summary>
         <div style="margin-top:10px;">
@@ -139,11 +133,16 @@
     <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Loading...</div>
 
     <script>
-        const BIN_ID = '6937d64fae596e708f8d16a9'; 
-        const API_KEY = '$2a$10$/hLwjwFuLAmOdHLdMG64ZeTBqP43JSwO3KQh/NZRjzu6hNtpCTAO6';
+        // ====== PASTE YOUR JSONBLOB ID HERE (same ID in board.html) ======
+        const BLOB_ID = 'PASTE_JSONBLOB_ID_HERE';
+        const URL_ = 'https://jsonblob.com/api/jsonBlob/' + BLOB_ID;
+        const HDR = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+
+        let ch = null;
+        try { ch = new BroadcastChannel('score'); } catch (e) {}
 
         const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 'oppScore',
-                     'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts', 
+                     'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts',
                      'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
 
         let loaded = false;
@@ -323,20 +322,16 @@
             send();
         }
 
-        const ch = new BroadcastChannel('score');   // add this near BIN_ID
-
         async function send() {
-            try { ch.postMessage(buildPayload()); } catch (e) {}   // local backup, works even if JSONBin is down
+            const payload = buildPayload();
+            try { if (ch) ch.postMessage(payload); } catch (e) {}   // instant local overlay update
             if (inflight) { dirty = true; return; }
             inflight = true; dirty = false;
+            document.getElementById('status').innerText = 'Updating...';
             const ctrl = new AbortController();
             const to = setTimeout(() => ctrl.abort(), 10000);
             try {
-                const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                    method: 'PUT', signal: ctrl.signal,
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                    body: JSON.stringify(buildPayload())
-                });
+                const r = await fetch(URL_, { method: 'PUT', signal: ctrl.signal, headers: HDR, body: JSON.stringify(payload) });
                 document.getElementById('status').innerText = r.ok ? 'Updated live!' : 'Cloud failed (HTTP ' + r.status + ') - local backup active';
             } catch (e) {
                 document.getElementById('status').innerText = 'Cloud error - local backup active';
@@ -375,36 +370,32 @@
             voiceOn = true; rec.start(); btn.innerText = 'VOICE SCORING: ON (listening)';
         }
 
-        fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+        // ---- Initial load ----
+        fetch(URL_, { headers: { 'Accept': 'application/json' } })
             .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-            .then(json => {
-                const d = json.record || {};
+            .then(d => {
                 ids.forEach(id => {
                     const el = document.getElementById(id);
                     if (el && d[id] !== undefined) el.value = d[id];
                 });
                 setBattingSide(d.battingSide || 'team1', true);
-                
                 try {
                     const saved = localStorage.getItem('tapState');
-                    if (saved) {
-                        S = JSON.parse(saved);
-                    } else {
-                        syncDOMToState();
-                    }
-                } catch (e) {
-                    syncDOMToState();
-                }
-
+                    if (saved) { S = JSON.parse(saved); } else { syncDOMToState(); }
+                } catch (e) { syncDOMToState(); }
                 syncStateToDOM();
                 updateColors();
                 loaded = true;
                 document.getElementById('status').innerText = 'Ready (auto-saving enabled)';
             })
             .catch(e => {
-                document.getElementById('status').innerText = 'Could not load (' + e.message + '), offline mode';
+                document.getElementById('status').innerText = 'Could not load (' + e.message + '), offline mode - check BLOB_ID';
                 loaded = true;
-                syncDOMToState();
+                try {
+                    const saved = localStorage.getItem('tapState');
+                    if (saved) S = JSON.parse(saved);
+                } catch (err) {}
+                syncStateToDOM();
             });
     </script>
 </body>
