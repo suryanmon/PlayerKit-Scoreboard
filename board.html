@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;800&display=swap');
-  html, body { margin: 0; background: transparent; overflow: hidden; font-family: 'Exo 2', sans-serif; }
+  html, body { margin: 0; background: transparent; overflow: hidden; font-family: 'Exo 2', 'Arial Black', Arial, sans-serif; }
   .score-card {
     position: fixed; right: 30px; bottom: 30px; display: block;
     background: #19252b; color: #fff; border-radius: 10px; border-bottom: 3px solid #333;
@@ -12,7 +12,8 @@
   }
   .team { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
   .line { display: flex; align-items: baseline; gap: 8px; }
-  .score { font-size: 38px; font-weight: 800; color: #ffeb3b; line-height: 1.05; }
+  .score { display: inline-flex; align-items: center; gap: 7px; font-size: 38px; font-weight: 800; color: #ffeb3b; line-height: 1.1; font-variant-numeric: lining-nums; font-synthesis: none; text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
+  .sep { display: inline-block; width: 14px; height: 6px; border-radius: 2px; background: #ffeb3b; }
   .overs { font-size: 16px; color: #aaa; font-weight: 500; }
 </style>
 </head>
@@ -20,7 +21,7 @@
 <div class="score-card" id="card">
   <div class="team"><span id="team">MATCH</span> <span id="dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4caf50;opacity:.25;vertical-align:middle;"></span></div>
   <div class="line">
-    <span class="score" id="score">0-0</span>
+    <span class="score"><span id="runs">0</span><span class="sep"></span><span id="wkts">0</span></span>
     <span class="overs" id="overs">(0.0)</span>
   </div>
 </div>
@@ -33,7 +34,9 @@
   function render(d) {
     const bat = d.battingSide || 'team1';
     document.getElementById('team').innerText = bat === 'team1' ? (d.team1Name || 'TEAM 1') : (d.team2Name || 'TEAM 2');
-    document.getElementById('score').innerText = d.score || '0-0';
+    const sp = String(d.score || '0-0').split('-');
+    document.getElementById('runs').innerText = sp[0] || '0';
+    document.getElementById('wkts').innerText = sp[1] || '0';
     document.getElementById('overs').innerText = '(' + (d.overs || '0.0') + ')';
     tick = !tick;
     document.getElementById('dot').style.opacity = tick ? '1' : '0.25';
