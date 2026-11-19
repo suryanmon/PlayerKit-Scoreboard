@@ -26,10 +26,9 @@
 </div>
 
 <script>
-  const BLOB_ID = 'PASTE_JSONBLOB_ID_HERE';
-  const URL_ = 'https://jsonblob.com/api/jsonBlob/' + BLOB_ID;
-  const POLL_MS = 3000;
-  let tick = false, fails = 0;
+  const TOPIC = 'edwydenny-cricket-7k3q9x2m4p';   // must match admin.html
+  const SSE_URL = 'https://ntfy.sh/' + TOPIC + '/sse?since=all';
+  let tick = false;
 
   function render(d) {
     const bat = d.battingSide || 'team1';
@@ -40,24 +39,15 @@
     document.getElementById('dot').style.opacity = tick ? '1' : '0.25';
   }
 
-  // Local backup: instant updates from admin page in the same browser
-  try { const ch = new BroadcastChannel('score'); ch.onmessage = e => render(e.data); } catch (e) {}
-
-  async function fetchScore() {
-    try {
-      const res = await fetch(URL_ + '?_=' + Date.now(), { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      render(await res.json());
-      fails = 0;
-      document.getElementById('dot').style.background = '#4caf50';
-    } catch (e) {
-      fails++;
-      document.getElementById('dot').style.background = '#ff5252'; // tiny red dot only; score stays visible
-      console.log(e);
-    }
+  function connect() {
+    const es = new EventSource(SSE_URL);
+    es.onopen = () => { document.getElementById('dot').style.background = '#4caf50'; };
+    es.onmessage = e => {
+      try { const m = JSON.parse(e.data); if (m.event === 'message') render(JSON.parse(m.message)); } catch (err) { console.log(err); }
+    };
+    es.onerror = () => { document.getElementById('dot').style.background = '#ff5252'; };  // tiny red dot only; auto-reconnects
   }
-  async function loop() { await fetchScore(); setTimeout(loop, Math.min(POLL_MS * (1 + fails), 20000)); }
-  loop();
+  connect();
 </script>
 </body>
 </html>
