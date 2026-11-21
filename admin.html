@@ -129,7 +129,8 @@
         </div>
     </details>
 
-    <button onclick="resetBoard()" class="btn-reset">⚠️ RESET ALL SCORES</button>
+    <button onclick="resetBoard()" class="btn-reset">⚠️ RESET MATCH (keeps leaderboard)</button>
+    <button onclick="resetLeaderboard()" class="btn-reset" style="background:#6a1b9a;">🏆 RESET LEADERBOARD</button>
     <div id="status" style="text-align:center; margin-top:10px; font-size:12px; color:#888;">Loading...</div>
 
     <script>
@@ -184,7 +185,6 @@
             if (ballsDone()) return alert('Innings over. Start 2nd innings or reset.');
             snap();
             S.runs += r; S.pr[S.striker] += r; S.balls++;
-            if (r % 2 === 1) swapStrikerQuiet();
             if (S.balls % 6 === 0) swapStrikerQuiet();
             syncStateToDOM();
             push();
@@ -215,13 +215,24 @@
         }
 
         function resetBoard() {
-            if (!confirm('⚠️ Are you sure? This will reset SCORES to 0 but keep names.')) return;
+            if (!confirm('Reset the MATCH score to 0? Names and the leaderboard are kept.')) return;
             snap();
+            const keepPr = S.pr, keepPw = S.pw;
             S = {
                 bat: 'team1', runs: 0, wkts: 0, balls: 0,
                 striker: 1, bowler: 3, innings: 1, target: 0, oppScore: '',
-                pr: {1:0, 2:0, 3:0, 4:0}, pw: {1:0, 2:0, 3:0, 4:0}
+                pr: keepPr, pw: keepPw
             };
+            setBattingSide('team1', true);
+            syncStateToDOM();
+            push();
+        }
+
+        function resetLeaderboard() {
+            if (!confirm('Reset the LEADERBOARD (all player runs and wickets) to 0?')) return;
+            snap();
+            S.pr = {1:0, 2:0, 3:0, 4:0};
+            S.pw = {1:0, 2:0, 3:0, 4:0};
             syncStateToDOM();
             push();
         }
