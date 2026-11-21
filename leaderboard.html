@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;800&display=swap');
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; font-family: 'Exo 2', 'Arial Black', Arial, sans-serif; }
+  .wrap { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .card {
+    width: 92vw; background: rgba(25,37,43,0.94); color: #fff; border-radius: 3vw;
+    border-bottom: 0.8vw solid #333; box-shadow: 0 1vw 4vw rgba(0,0,0,0.55); padding: 4vw 4vw 5vw;
+  }
+  h1 { margin: 0 0 3vw; text-align: center; font-size: 7vw; font-weight: 800; letter-spacing: 0.4vw; color: #ffeb3b; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: lining-nums; }
+  th { font-size: 3.6vw; font-weight: 700; color: #aaa; text-transform: uppercase; padding: 0 1vw 2vw; text-align: center; }
+  th.name, td.name { text-align: left; }
+  td { font-size: 6.5vw; font-weight: 800; padding: 2.4vw 1vw; text-align: center; border-top: 0.3vw solid rgba(255,255,255,0.12); }
+  td.rank { width: 9vw; color: #ffeb3b; }
+  td.name { max-width: 40vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+  td.runs { color: #ffeb3b; }
+  td.wkts { color: #ff7043; }
+  .dot { display: inline-block; width: 3vw; height: 3vw; border-radius: 50%; margin-right: 2vw; vertical-align: middle; }
+  tr.first td.name { color: #ffeb3b; }
+  #conn { position: fixed; right: 1.5vw; bottom: 1.5vw; width: 1.6vw; height: 1.6vw; border-radius: 50%; background: #4caf50; opacity: .25; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Leaderboard</h1>
+    <table>
+      <thead><tr><th>#</th><th class="name">Player</th><th>Runs</th><th>Wkts</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+<div id="conn"></div>
+
+<script>
+  const TOPIC = 'edwydenny-cricket-7k3q9x2m4p';   // must match admin.html and board.html
+  const SSE_URL = 'https://ntfy.sh/' + TOPIC + '/sse?since=all';
+  const SAFE_COLOR = /^#[0-9a-fA-F]{3,8}$/;
+
+  function cell(cls, text) {
+    const td = document.createElement('td');
+    td.className = cls;
+    td.textContent = text;
+    return td;
+  }
+
+  function render(d) {
+    const rows = [1, 2, 3, 4].map(n => ({
+      name: String(d['p' + n + 'Name'] || '').trim() || 'P' + n,
+      runs: parseInt(d['p' + n + 'Runs'], 10) || 0,
+      wkts: parseInt(d['p' + n + 'Wkts'], 10) || 0,
+      color: String(n <= 2 ? d.color1 : d.color2 || '')
+    }));
+    rows.sort((a, b) => b.runs - a.runs || b.wkts - a.wkts);
+
+    const body = document.getElementById('rows');
+    body.textContent = '';
+    rows.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      if (i === 0) tr.className = 'first';
+      tr.appendChild(cell('rank', i + 1));
+      const nameTd = cell('name', r.name);
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dot.style.background = SAFE_COLOR.test(r.color) ? r.color : '#888';
+      nameTd.prepend(dot);
+      tr.appendChild(nameTd);
+      tr.appendChild(cell('runs', r.runs));
+      tr.appendChild(cell('wkts', r.wkts));
+      body.appendChild(tr);
+    });
+  }
+
+  render({});
+
+  const conn = document.getElementById('conn');
+  const es = new EventSource(SSE_URL);   // auto-reconnects on its own
+  es.onopen = () => { conn.style.background = '#4caf50'; };
+  es.onerror = () => { conn.style.background = '#ff5252'; };
+  es.onmessage = e => {
+    try {
+      const m = JSON.parse(e.data);
+      if (m.event !== 'message') return;
+      const d = JSON.parse(m.message);
+      if (d && typeof d === 'object') { render(d); conn.style.opacity = conn.style.opacity === '1' ? '.25' : '1'; }
+    } catch (err) {}
+  };
+</script>
+</body>
+</html>
