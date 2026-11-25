@@ -18,6 +18,9 @@
   .score { display: inline-flex; align-items: center; gap: 2vw; font-size: 12vw; font-weight: 800; color: #ffeb3b; line-height: 1.1; font-variant-numeric: lining-nums; font-synthesis: none; text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
   .sep { display: inline-block; width: 3.8vw; height: 1.6vw; border-radius: 0.5vw; background: #ffeb3b; }
   .overs { font-size: 4.8vw; color: #aaa; font-weight: 500; }
+  .chase { display: none; margin-top: 1.2vw; padding-top: 1.2vw; border-top: 0.3vw solid rgba(255,255,255,0.15); }
+  .target { font-size: 4.8vw; font-weight: 800; text-transform: uppercase; letter-spacing: .15vw; }
+  .need { font-size: 3.9vw; font-weight: 700; color: #aaa; text-transform: uppercase; white-space: nowrap; }
   #dot { display: inline-block; width: 1.6vw; height: 1.6vw; border-radius: 50%; background: #4caf50; opacity: .25; vertical-align: middle; }
 </style>
 </head>
@@ -27,6 +30,10 @@
   <div class="line">
     <span class="score"><span id="runs">0</span><span class="sep"></span><span id="wkts">0</span></span>
     <span class="overs" id="overs">(0.0)</span>
+  </div>
+  <div class="chase" id="chase">
+    <div class="target" id="target"></div>
+    <div class="need" id="need"></div>
   </div>
 </div>
 
@@ -43,6 +50,19 @@
     $('runs').textContent = sp[0] || '0';
     $('wkts').textContent = sp[1] || '0';
     $('overs').textContent = '(' + (d.overs || '0.0') + ')';
+    const tgt = parseInt(d.target, 10) || 0;
+    if (tgt > 0) {
+      const ov = String(d.overs || '0.0').split('.');
+      const played = (parseInt(ov[0], 10) || 0) * 6 + (parseInt(ov[1], 10) || 0);
+      const total = (parseInt(d.totalOvers, 10) || 4) * 6;
+      const need = tgt - (parseInt(sp[0], 10) || 0);
+      const left = Math.max(total - played, 0);
+      $('target').textContent = 'Target ' + tgt;
+      $('need').textContent = need <= 0 ? 'Target chased' : 'Need ' + need + ' from ' + left + (left === 1 ? ' ball' : ' balls');
+      $('chase').style.display = 'block';
+    } else {
+      $('chase').style.display = 'none';
+    }
     tick = !tick;
     $('dot').style.opacity = tick ? '1' : '0.25';
   }
