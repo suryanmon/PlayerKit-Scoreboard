@@ -66,6 +66,17 @@
     </div>
 
     <div class="card">
+        <label>Match Format</label>
+        <div class="toggle-container">
+            <div class="toggle-btn" id="btnM1" onclick="setMode('1v1')">1 v 1</div>
+            <div class="toggle-btn active" id="btnM2" onclick="setMode('2v2')">2 v 2</div>
+        </div>
+        <div class="row" style="margin-top:10px; margin-bottom:0;">
+            <div style="flex:1"><label>Total Overs (per innings)</label><input type="number" id="totalOvers" value="4" min="1" max="50" step="1"></div>
+        </div>
+    </div>
+
+    <div class="card">
         <label>Batting Side Mode</label>
         <div class="toggle-container">
             <label class="toggle-btn active" id="btnT1" onclick="setBattingSide('team1')">
@@ -90,7 +101,7 @@
             <div style="flex:1"><label>Runs</label><input type="number" id="p1Runs" value="0"></div>
             <div style="flex:1"><label>Wkts</label><input type="number" id="p1Wkts" value="0"></div>
         </div>
-        <div class="row">
+        <div class="row" id="rowP2">
             <div style="flex:2"><label>P2 Name</label><input type="text" id="p2Name" placeholder="Player 2"></div>
             <div style="flex:1"><label>Runs</label><input type="number" id="p2Runs" value="0"></div>
             <div style="flex:1"><label>Wkts</label><input type="number" id="p2Wkts" value="0"></div>
@@ -108,7 +119,7 @@
             <div style="flex:1"><label>Runs</label><input type="number" id="p3Runs" value="0"></div>
             <div style="flex:1"><label>Wkts</label><input type="number" id="p3Wkts" value="0"></div>
         </div>
-        <div class="row">
+        <div class="row" id="rowP4">
             <div style="flex:2"><label>P4 Name</label><input type="text" id="p4Name" placeholder="Player 4"></div>
             <div style="flex:1"><label>Runs</label><input type="number" id="p4Runs" value="0"></div>
             <div style="flex:1"><label>Wkts</label><input type="number" id="p4Wkts" value="0"></div>
@@ -141,27 +152,29 @@
 
         const ids = ['team1Name', 'team2Name', 'color1', 'color2', 'score', 'overs', 'target', 'oppScore',
                      'p1Name', 'p1Runs', 'p1Wkts', 'p2Name', 'p2Runs', 'p2Wkts',
-                     'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts'];
+                     'p3Name', 'p3Runs', 'p3Wkts', 'p4Name', 'p4Runs', 'p4Wkts', 'totalOvers'];
 
         let loaded = false;
         let saveTimer = null, inflight = false, dirty = false;
         let history = [];
 
         let S = {
+            mode: '2v2', total: 4,
             bat: 'team1', runs: 0, wkts: 0, balls: 0,
             striker: 1, bowler: 3, innings: 1, target: 0, oppScore: '',
             pr: {1:0, 2:0, 3:0, 4:0}, pw: {1:0, 2:0, 3:0, 4:0}
         };
-        const MAX_BALLS = 24;
+        const maxBalls = () => S.total * 6;
 
-        const batPlayers = () => S.bat === 'team1' ? [1, 2] : [3, 4];
-        const fieldPlayers = () => S.bat === 'team1' ? [3, 4] : [1, 2];
+        // 1v1 uses P1 (Team 1) vs P3 (Team 2). 2v2 uses all four.
+        const batPlayers = () => S.mode === '1v1' ? (S.bat === 'team1' ? [1] : [3]) : (S.bat === 'team1' ? [1, 2] : [3, 4]);
+        const fieldPlayers = () => S.mode === '1v1' ? (S.bat === 'team1' ? [3] : [1]) : (S.bat === 'team1' ? [3, 4] : [1, 2]);
         const pname = n => (document.getElementById('p' + n + 'Name').value || 'P' + n);
 
         function snap() { history.push(JSON.stringify(S)); if (history.length > 60) history.shift(); }
         function undo() { if (!history.length) return; S = JSON.parse(history.pop()); syncStateToDOM(); push(); }
 
-        function ballsDone() { return S.balls >= MAX_BALLS; }
+        function ballsDone() { return S.balls >= maxBalls(); }
         function overs() { return Math.floor(S.balls / 6) + '.' + (S.balls % 6); }
 
         function setBattingSide(team, skipPush = false) {
@@ -170,6 +183,14 @@
             document.getElementById('btnT2').className = team === 'team2' ? 'toggle-btn active' : 'toggle-btn';
             document.getElementById('batSide1').checked = (team === 'team1');
             document.getElementById('batSide2').checked = (team === 'team2');
+            if (!batPlayers().includes(S.striker)) S.striker = batPlayers()[0];
+            if (!fieldPlayers().includes(S.bowler)) S.bowler = fieldPlayers()[0];
+            renderUI();
+            if (!skipPush) push();
+        }
+
+        function setMode(m, skipPush = false) {
+            S.mode = (m === '1v1') ? '1v1' : '2v2';
             if (!batPlayers().includes(S.striker)) S.striker = batPlayers()[0];
             if (!fieldPlayers().includes(S.bowler)) S.bowler = fieldPlayers()[0];
             renderUI();
@@ -198,7 +219,7 @@
             push();
         }
         function extra() { snap(); S.runs += 1; syncStateToDOM(); push(); }
-        function swapStrikerQuiet() { const p = batPlayers(); S.striker = (S.striker === p[0]) ? p[1] : p[0]; }
+        function swapStrikerQuiet() { const p = batPlayers(); if (p.length < 2) return; S.striker = (S.striker === p[0]) ? p[1] : p[0]; }
         function swapStriker() { snap(); swapStrikerQuiet(); syncStateToDOM(); push(); }
 
         function nextInnings() {
@@ -219,6 +240,7 @@
             snap();
             const keepPr = S.pr, keepPw = S.pw;
             S = {
+                mode: S.mode, total: S.total,
                 bat: 'team1', runs: 0, wkts: 0, balls: 0,
                 striker: 1, bowler: 3, innings: 1, target: 0, oppScore: '',
                 pr: keepPr, pw: keepPw
@@ -244,6 +266,7 @@
             document.getElementById('overs').value = overs();
             document.getElementById('target').value = S.target ? S.target : '';
             document.getElementById('oppScore').value = S.oppScore;
+            document.getElementById('totalOvers').value = S.total;
             [1,2,3,4].forEach(n => {
                 document.getElementById('p' + n + 'Runs').value = S.pr[n];
                 document.getElementById('p' + n + 'Wkts').value = S.pw[n];
@@ -263,6 +286,8 @@
                 const ballsInOver = parseInt(ovParts[1]) || 0;
                 S.balls = completedOvers * 6 + ballsInOver;
             }
+            const tot = parseInt(document.getElementById('totalOvers').value, 10);
+            if (tot > 0) S.total = Math.min(tot, 50);
             S.target = parseInt(document.getElementById('target').value) || 0;
             S.oppScore = document.getElementById('oppScore').value;
             [1,2,3,4].forEach(n => {
@@ -273,10 +298,15 @@
         }
 
         function renderUI() {
+            const one = S.mode === '1v1';
+            document.getElementById('btnM1').className = one ? 'toggle-btn active' : 'toggle-btn';
+            document.getElementById('btnM2').className = one ? 'toggle-btn' : 'toggle-btn active';
+            document.getElementById('rowP2').style.display = one ? 'none' : '';
+            document.getElementById('rowP4').style.display = one ? 'none' : '';
             document.getElementById('liveScore').innerText = S.runs + '-' + S.wkts;
-            document.getElementById('liveOvers').innerText = overs();
+            document.getElementById('liveOvers').innerText = overs() + '/' + S.total;
             let info = 'Innings ' + S.innings;
-            if (S.target) info += ' | Need ' + Math.max(S.target - S.runs, 0) + ' from ' + Math.max(MAX_BALLS - S.balls, 0) + ' balls';
+            if (S.target) info += ' | Target ' + S.target + ' | Need ' + Math.max(S.target - S.runs, 0) + ' from ' + Math.max(maxBalls() - S.balls, 0) + ' balls';
             document.getElementById('liveInfo').innerText = info;
 
             document.getElementById('strikerChips').innerHTML = batPlayers().map(n =>
@@ -298,6 +328,8 @@
             d.target = S.target ? String(S.target) : '';
             d.oppScore = S.oppScore;
             d.innings = S.innings;
+            d.mode = S.mode;
+            d.totalOvers = String(S.total);
             [1,2,3,4].forEach(n => {
                 d['p'+n+'Runs'] = String(S.pr[n]);
                 d['p'+n+'Wkts'] = String(S.pw[n]);
@@ -387,6 +419,7 @@
                     const el = document.getElementById(id);
                     if (el && d[id] !== undefined) el.value = d[id];
                 });
+                S.mode = d.mode === '1v1' ? '1v1' : '2v2';
                 setBattingSide(d.battingSide || 'team1', true);
                 syncDOMToState();
                 if (d.innings) S.innings = parseInt(d.innings) || 1;
@@ -400,7 +433,7 @@
                 loaded = true;
                 try {
                     const saved = localStorage.getItem('tapState');
-                    if (saved) S = JSON.parse(saved);
+                    if (saved) S = Object.assign(S, JSON.parse(saved));
                 } catch (err) {}
                 syncStateToDOM();
             });
