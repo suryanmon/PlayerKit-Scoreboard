@@ -51,11 +51,12 @@
   }
 
   function render(d) {
-    const rows = [1, 2, 3, 4].map(n => ({
+    const players = d.mode === '1v1' ? [1, 3] : [1, 2, 3, 4];   // 1v1 = P1 vs P3
+    const rows = players.map(n => ({
       name: String(d['p' + n + 'Name'] || '').trim() || 'P' + n,
       runs: parseInt(d['p' + n + 'Runs'], 10) || 0,
       wkts: parseInt(d['p' + n + 'Wkts'], 10) || 0,
-      color: String(n <= 2 ? d.color1 : d.color2 || '')
+      color: String((n <= 2 ? d.color1 : d.color2) || '')
     }));
     rows.sort((a, b) => b.runs - a.runs || b.wkts - a.wkts);
 
